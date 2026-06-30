@@ -1,0 +1,169 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Générateur d'exercices — École FLE{% endblock %}
+{% block breadcrumb %}Générateur d'exercices{% endblock %}
+
+{% block content %}
+
+<div class="page-header animate-in">
+    <div class="page-eyebrow"><i class="fa-solid fa-bolt me-2" style="color:var(--orange);"></i>IA avancée</div>
+    <h1 class="page-title">🤖 Générateur d'exercices</h1>
+    <p class="page-subtitle">Créez 10 exercices personnalisés en 10 secondes avec l'intelligence artificielle.</p>
+</div>
+
+<div class="row g-4">
+    <!-- Formulaire -->
+    <div class="col-lg-5 animate-in animate-in-d1">
+        <div class="glass-card p-4">
+            <form method="post" action="{% url 'ai_tools:generate_exercise' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label-dark">Règle grammaticale</label>
+                    <input type="text" name="grammar_rule" class="form-control-dark" placeholder="Ex: le subjonctif présent" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Niveau</label>
+                    <select name="level" class="form-select-dark">
+                        <option value="A1">A1 - Débutant</option>
+                        <option value="A2" selected>A2 - Élémentaire</option>
+                        <option value="B1">B1 - Intermédiaire</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Type d'exercice</label>
+                    <select name="exercise_type" class="form-select-dark">
+                        <option value="mcq">QCM</option>
+                        <option value="fill_blank">Texte à trous</option>
+                        <option value="order_sentence">Remettre en ordre</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Nombre d'exercices</label>
+                    <select name="count" class="form-select-dark">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary-gradient w-100">
+                    <i class="fa-solid fa-bolt"></i> Générer les exercices
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Résultats -->
+    <div class="col-lg-7 animate-in animate-in-d2">
+        <div class="glass-card p-4">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);">
+                        <i class="fa-regular fa-file-lines"></i>
+                    </div>
+                    Exercices générés
+                </div>
+                <span class="pill pill-mint" style="font-size:.7rem;"><i class="fa-regular fa-clock"></i> Dernière génération: aujourd'hui</span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px;max-height:500px;overflow-y:auto;padding-right:8px;">
+
+                {% if request.session.generated_exercises %}
+                    {% for exercise in request.session.generated_exercises %}
+                    <div class="exercise-item" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                            <span class="pill pill-violet" style="font-size:.6rem;">{{ exercise.type|default:"Exercice" }}</span>
+                            <span class="pill pill-mint" style="font-size:.6rem;">{{ exercise.level|default:"A1" }}</span>
+                        </div>
+                        <div style="font-weight:600;color:var(--text-primary);font-size:.9rem;margin-bottom:8px;">
+                            {{ exercise.question }}
+                        </div>
+                        {% if exercise.options %}
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                            {% for option in exercise.options %}
+                            <span class="pill" style="background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border);font-size:.75rem;">
+                                {{ option }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div style="margin-top:10px;font-size:.75rem;color:var(--mint);">
+                            <i class="fa-regular fa-circle-check"></i> Réponse correcte: {{ exercise.correct_answer }}
+                        </div>
+                        {% if exercise.explanation %}
+                        <div style="margin-top:8px;font-size:.75rem;color:var(--text-muted);">
+                            <i class="fa-regular fa-lightbulb"></i> {{ exercise.explanation }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Exemple d'exercice 1 -->
+                    <div class="exercise-item" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                            <span class="pill pill-violet" style="font-size:.6rem;">QCM</span>
+                            <span class="pill pill-mint" style="font-size:.6rem;">A1</span>
+                        </div>
+                        <div style="font-weight:600;color:var(--text-primary);font-size:.9rem;margin-bottom:8px;">
+                            Complétez la phrase avec la bonne forme du verbe.
+                        </div>
+                        <div style="color:var(--text-secondary);font-size:.85rem;margin-bottom:8px;">
+                            "Il _____ que tu viennes." (falloir)
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                            <span class="pill" style="background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border);font-size:.75rem;">a) faut</span>
+                            <span class="pill" style="background:var(--violet-dim);color:var(--violet-light);border:1px solid var(--violet);font-size:.75rem;">b) faut-il</span>
+                            <span class="pill" style="background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border);font-size:.75rem;">c) fasse</span>
+                        </div>
+                        <div style="margin-top:10px;font-size:.75rem;color:var(--mint);">
+                            <i class="fa-regular fa-circle-check"></i> Réponse correcte: c) fasse
+                        </div>
+                    </div>
+
+                    <!-- Exemple d'exercice 2 -->
+                    <div class="exercise-item" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                            <span class="pill pill-orange" style="font-size:.6rem;">Texte à trous</span>
+                            <span class="pill pill-mint" style="font-size:.6rem;">A2</span>
+                        </div>
+                        <div style="font-weight:600;color:var(--text-primary);font-size:.9rem;margin-bottom:8px;">
+                            Complétez les trous avec les mots suivants.
+                        </div>
+                        <div style="color:var(--text-secondary);font-size:.85rem;margin-bottom:8px;">
+                            "Je _____ (vouloir) que tu _____ (venir) à la fête."
+                        </div>
+                        <div style="margin-top:10px;font-size:.75rem;color:var(--mint);">
+                            <i class="fa-regular fa-circle-check"></i> Réponses: veux, viennes
+                        </div>
+                    </div>
+
+                    <!-- Message vide -->
+                    <div id="emptyMessage" style="text-align:center;padding:48px 24px;color:var(--text-muted);">
+                        <i class="fa-regular fa-file-lines" style="font-size:3rem;opacity:.2;display:block;margin-bottom:16px;"></i>
+                        <p style="font-size:.9rem;">Aucun exercice généré pour le moment.</p>
+                        <p style="font-size:.8rem;">Remplissez le formulaire à gauche pour en créer !</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-scroll to results after generation
+const form = document.querySelector('form');
+if (form) {
+    form.addEventListener('submit', function() {
+        setTimeout(() => {
+            const results = document.querySelector('.col-lg-7');
+            if (results) results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+    });
+}
+</script>
+{% endblock %}

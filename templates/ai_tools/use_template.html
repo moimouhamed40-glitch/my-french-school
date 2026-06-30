@@ -1,0 +1,56 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}{{ template.title }}{% endblock %}
+{% block breadcrumb %}Modèles IA{% endblock %}
+{% block nav_templates %}active{% endblock %}
+{% block content %}
+<div class="animate-in mb-3">
+  <a href="{% url 'ai_tools:templates_lab' %}" style="font-size:.8rem;color:var(--text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;"><i class="fa-solid fa-arrow-left"></i> Retour aux modèles</a>
+</div>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="page-header animate-in"><div class="page-eyebrow"><i class="fa-solid fa-layer-group me-2"></i>{{ template.get_template_type_display }}</div><h1 class="page-title">{{ template.title }}</h1></div>
+    <div class="glass-card p-4 mb-4 animate-in animate-in-d1">
+      <div class="section-title mb-4"><div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-sliders"></i></div> Paramètres</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          {% for field in form %}
+          <div class="col-12">
+            <label class="form-label-dark">{{ field.label }}</label>
+            {{ field }}
+          </div>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn-primary-gradient mt-4" style="padding:11px 28px;"><i class="fa-solid fa-bolt"></i> Générer avec l'IA</button>
+      </form>
+    </div>
+    {% if result %}
+    <div class="glass-card p-4 animate-in animate-in-d2" style="border:1px solid var(--border-glow);">
+      <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-robot"></i></div> Résultat généré</div>
+      <div style="background:var(--bg-card);border-radius:10px;padding:18px;font-size:.87rem;color:var(--text-secondary);line-height:1.8;white-space:pre-wrap;">{{ result }}</div>
+      <div class="d-flex gap-2 mt-3">
+        <button onclick="navigator.clipboard.writeText(document.querySelector('.result-text').textContent)" class="btn-ghost" style="font-size:.8rem;padding:8px 16px;"><i class="fa-regular fa-copy"></i> Copier</button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="col-lg-5 animate-in animate-in-d2">
+    <div class="glass-card p-4 mb-4">
+      <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--orange-dim);color:var(--orange);"><i class="fa-solid fa-code"></i></div> Prompt template</div>
+      <pre style="font-size:.75rem;font-family:var(--font-mono);color:var(--mint);background:var(--bg-card);padding:14px;border-radius:10px;white-space:pre-wrap;line-height:1.6;border:1px solid var(--border);">{{ template.prompt_template }}</pre>
+    </div>
+    {% if template.example_output %}
+    <div class="glass-card p-4">
+      <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-eye"></i></div> Exemple de sortie</div>
+      <div style="font-size:.8rem;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;">{{ template.example_output }}</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<style>
+input,textarea,select{background:var(--bg-card)!important;border:1px solid var(--border)!important;color:var(--text-primary)!important;border-radius:10px!important;padding:10px 14px!important;font-family:var(--font-body)!important;font-size:.85rem!important;width:100%!important;transition:border-color var(--transition)!important;}
+input:focus,textarea:focus,select:focus{border-color:var(--violet)!important;box-shadow:0 0 0 3px rgba(108,62,255,.15)!important;outline:none!important;}
+</style>
+{% endblock %}

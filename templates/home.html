@@ -1,0 +1,38 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}École FLE — Apprenez le français en ligne{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="py-5 text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Bienvenue sur <span style="color: var(--mint);">École FLE</span></h1>
+        <p class="lead">Apprenez le français avec l'intelligence artificielle</p>
+        <div class="mt-4">
+            <a href="{% url 'accounts:register' %}" class="btn btn-primary-gradient">Commencer gratuitement</a>
+            <a href="{% url 'courses:list' %}" class="btn btn-ghost">Explorer les cours</a>
+        </div>
+        <div class="row mt-5 g-4">
+            <div class="col-md-4">
+                <div class="glass-card">
+                    <h3>{{ stats.total_students }}+</h3>
+                    <p class="text-muted">Élèves inscrits</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card">
+                    <h3>{{ stats.total_courses }}+</h3>
+                    <p class="text-muted">Cours disponibles</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card">
+                    <h3>{{ stats.total_teachers }}+</h3>
+                    <p class="text-muted">Enseignants experts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Cours{% endblock %}
+{% block breadcrumb %}Cours{% endblock %}
+{% block nav_courses %}active{% endblock %}
+{% block content %}
+<div class="page-header animate-in">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+    <div>
+      <div class="page-eyebrow"><i class="fa-solid fa-book-open me-2"></i>Catalogue</div>
+      <h1 class="page-title">Explorer les cours</h1>
+      <p class="page-subtitle">{{ courses.count }} cours disponible{{ courses.count|pluralize }} · niveaux A1, A2, B1</p>
+    </div>
+    {% if request.user.is_teacher or request.user.is_platform_admin %}
+    <a href="{% url 'courses:create' %}" class="btn-primary-gradient"><i class="fa-solid fa-plus"></i> Nouveau cours</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="glass-card p-3 mb-4 animate-in">
+  <form method="get" class="d-flex align-items-center gap-3 flex-wrap">
+    <div style="position:relative;flex:1;min-width:200px;">
+      <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.8rem;"></i>
+      <input name="q" value="{{ search_q }}" placeholder="Rechercher un cours…" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);border-radius:10px;padding:8px 14px 8px 36px;font-size:.83rem;width:100%;">
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'courses:list' %}" class="pill {% if not current_level %}pill-violet{% else %}pill-muted{% endif %}" style="cursor:pointer;text-decoration:none;padding:7px 14px;">Tous</a>
+      {% for val, label in level_choices %}
+      <a href="?level={{ val }}{% if search_q %}&q={{ search_q }}{% endif %}" class="pill {% if current_level == val %}level-{{ val|lower }} {% else %}pill-muted{% endif %}" style="cursor:pointer;text-decoration:none;padding:7px 14px;">{{ val }}</a>
+      {% endfor %}
+    </div>
+    <select name="category" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);border-radius:10px;padding:8px 14px;font-size:.83rem;">
+      <option value="">Toutes catégories</option>
+      {% for cat in categories %}<option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn-primary-gradient" style="padding:9px 20px;font-size:.83rem;"><i class="fa-solid fa-filter"></i></button>
+  </form>
+</div>
+
+<!-- COURSE GRID -->
+<div class="row g-4">
+  {% for course in courses %}
+  <div class="col-md-6 col-xl-4 animate-in" style="animation-delay:{{ forloop.counter0|add:1 }}00ms;">
+    <a href="{{ course.get_absolute_url }}" class="course-card">
+      <div class="course-card-thumb">
+        {% if course.thumbnail %}
+        <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}">
+        {% else %}
+        <div class="course-card-thumb-placeholder" style="background:linear-gradient(135deg,{% cycle 'rgba(108,62,255,.2)' 'rgba(0,212,170,.2)' 'rgba(255,107,53,.2)' %},var(--bg-card));">
+          {% cycle '📚' '🎯' '✍️' '🌟' '🗣️' '📝' %}
+        </div>
+        {% endif %}
+        <!-- Overlay on hover -->
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),transparent);opacity:0;transition:opacity .3s;" class="course-overlay"></div>
+        {% if course.is_free %}<div style="position:absolute;top:12px;right:12px;"><span class="pill pill-mint" style="font-size:.65rem;"><i class="fa-solid fa-lock-open"></i> Gratuit</span></div>{% endif %}
+      </div>
+      <div class="course-card-body">
+        <span class="course-level-badge level-{{ course.level|lower }}">{{ course.level }}</span>
+        {% if course.category %}<span class="pill pill-muted" style="font-size:.65rem;margin-left:6px;">{{ course.category.name }}</span>{% endif %}
+        <div class="course-card-title">{{ course.title }}</div>
+        <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:12px;line-height:1.5;">{{ course.description|truncatewords:18 }}</p>
+        <div class="course-card-meta">
+          <span><i class="fa-solid fa-user"></i> {{ course.teacher.get_full_name|default:course.teacher.username }}</span>
+          <span><i class="fa-solid fa-users"></i> {{ course.student_count }}</span>
+          {% if course.duration_hours %}<span><i class="fa-regular fa-clock"></i> {{ course.duration_hours }}h</span>{% endif %}
+        </div>
+        {% with progress=45 %}
+        {% if request.user.is_authenticated and request.user.is_student %}
+        <div class="course-progress-bar mt-3">
+          <div class="course-progress-fill" data-width="{{ progress }}" style="width:0;"></div>
+        </div>
+        <div style="font-size:.7rem;color:var(--text-muted);margin-top:5px;text-align:right;">{{ progress }}% complété</div>
+        {% endif %}
+        {% endwith %}
+      </div>
+    </a>
+  </div>
+  {% empty %}
+  <div class="col-12 animate-in">
+    <div class="glass-card p-5 text-center">
+      <div style="font-size:4rem;opacity:.15;margin-bottom:16px;">📚</div>
+      <h5 style="color:var(--text-secondary);font-weight:600;">Aucun cours trouvé</h5>
+      <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:20px;">Essayez de modifier vos filtres ou votre recherche.</p>
+      <a href="{% url 'courses:list' %}" class="btn-ghost">Réinitialiser les filtres</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<style>
+.course-card:hover .course-overlay { opacity:1 !important; }
+</style>
+{% endblock %}

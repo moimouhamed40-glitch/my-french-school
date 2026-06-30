@@ -1,0 +1,91 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}{{ text.title }}{% endblock %}
+{% block breadcrumb %}{{ text.title|truncatechars:25 }}{% endblock %}
+{% block nav_library %}active{% endblock %}
+{% block content %}
+<div class="animate-in mb-3">
+  <a href="{% url 'courses:library' %}" style="font-size:.8rem;color:var(--text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+    <i class="fa-solid fa-arrow-left"></i> Retour à la bibliothèque
+  </a>
+</div>
+<div class="row g-4">
+  <div class="col-lg-8">
+    <!-- TEXT CARD -->
+    <div class="glass-card p-5 mb-4 animate-in">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--violet-dim),var(--mint-dim));display:flex;align-items:center;justify-content:center;font-size:1.6rem;">📜</div>
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="course-level-badge level-{{ text.level|lower }}">{{ text.level }}</span>
+            {% if text.audio_url %}<span class="pill pill-mint" style="font-size:.62rem;"><i class="fa-solid fa-headphones"></i> Audio disponible</span>{% endif %}
+          </div>
+          <h1 style="font-family:var(--font-display);font-weight:800;font-size:1.4rem;letter-spacing:-.03em;color:var(--text-primary);line-height:1.2;">{{ text.title }}</h1>
+          {% if text.author %}<div style="font-size:.78rem;color:var(--text-muted);margin-top:4px;"><i class="fa-solid fa-user-pen me-1" style="color:var(--violet-light);"></i>{{ text.author }}</div>{% endif %}
+        </div>
+      </div>
+      {% if text.audio_url %}
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:24px;">
+        <p style="font-size:.75rem;color:var(--text-muted);margin-bottom:8px;"><i class="fa-solid fa-headphones me-1" style="color:var(--mint);"></i>Écouter le texte</p>
+        <audio controls style="width:100%;border-radius:8px;"><source src="{{ text.audio_url }}">Votre navigateur ne supporte pas l'audio.</audio>
+      </div>
+      {% endif %}
+      <div class="divider"></div>
+      <!-- BODY TEXT with highlighted words -->
+      <div id="textBody" style="font-size:1rem;line-height:2;color:var(--text-secondary);font-family:var(--font-body);">
+        {% autoescape off %}{{ text.body_text|linebreaks }}{% endautoescape %}
+      </div>
+    </div>
+    <!-- TRANSLATION TOOLTIP LEGEND -->
+    {% if text.word_translations %}
+    <div class="glass-card p-4 animate-in animate-in-d2">
+      <div class="section-title mb-4">
+        <div class="section-title-icon" style="background:var(--orange-dim);color:var(--orange);"><i class="fa-solid fa-language"></i></div>
+        Vocabulaire — Traductions arabes
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+        {% for word, translation in text.word_translations.items %}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);transition:all var(--transition);" onmouseenter="this.style.borderColor='var(--border-glow)'" onmouseleave="this.style.borderColor='var(--border)'">
+          <span style="font-weight:600;font-size:.83rem;color:var(--violet-light);">{{ word }}</span>
+          <span style="font-size:.87rem;color:var(--text-primary);font-family:var(--font-arabic);" dir="rtl">{{ translation }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <!-- SIDEBAR -->
+  <div class="col-lg-4">
+    <div class="glass-card p-4 mb-4 animate-in animate-in-d1">
+      <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-circle-info"></i></div> À propos</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:.83rem;">
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">Niveau</span><span class="course-level-badge level-{{ text.level|lower }}">{{ text.level }}</span></div>
+        {% if text.author %}<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">Auteur</span><span style="color:var(--text-secondary);">{{ text.author }}</span></div>{% endif %}
+        {% if text.word_translations %}<div style="display:flex;justify-content:space-between;padding:8px 0;"><span style="color:var(--text-muted);">Mots traduits</span><span class="pill pill-orange">{{ text.word_translations|length }}</span></div>{% endif %}
+      </div>
+    </div>
+    <!-- COMPREHENSION EXERCISE PROMPT -->
+    <div class="glass-card p-4 animate-in animate-in-d2" style="background:linear-gradient(135deg,rgba(108,62,255,.08),rgba(0,212,170,.05));border:1px solid var(--border-glow);">
+      <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-robot"></i></div> Assistant IA</div>
+      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:14px;">Posez des questions sur ce texte à l'assistant IA.</p>
+      <a href="{% url 'ai_tools:chatbot' %}" class="btn-primary-gradient w-100 justify-content-center" style="font-size:.82rem;">
+        <i class="fa-solid fa-robot"></i> Demander à l'IA
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+// Highlight translated words in text
+const translations = {{ text.word_translations|default:"{}"|safe }};
+const textEl = document.getElementById('textBody');
+if (textEl && Object.keys(translations).length) {
+  let html = textEl.innerHTML;
+  Object.entries(translations).forEach(([word, tr]) => {
+    const re = new RegExp(`\\b${word}\\b`, 'gi');
+    html = html.replace(re, `<span style="color:var(--violet-light);border-bottom:2px dotted var(--violet);cursor:help;font-weight:600;" title="${tr}">${word}</span>`);
+  });
+  textEl.innerHTML = html;
+}
+</script>
+{% endblock %}

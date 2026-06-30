@@ -1,0 +1,165 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Tableau de bord Admin{% endblock %}
+{% block breadcrumb %}Administration{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block content %}
+<div class="page-header animate-in">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+    <div>
+      <div class="page-eyebrow"><i class="fa-solid fa-shield-halved me-2"></i>Administration plateforme</div>
+      <h1 class="page-title">Vue d'ensemble <span style="color:var(--orange);">⚡</span></h1>
+      <p class="page-subtitle">Superviser les utilisateurs, les cours et l'activité de la plateforme.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'accounts:user_list' %}" class="btn-ghost"><i class="fa-solid fa-users"></i> Gérer les utilisateurs</a>
+      <a href="{% url 'admin:index' %}" target="_blank" class="btn-primary-gradient"><i class="fa-solid fa-gear"></i> Admin Django</a>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="row g-3 mb-4">
+  {% for role_stat in stats.users %}
+  <div class="col-6 col-lg-3 animate-in">
+    <div class="stat-card {% if role_stat.role == 'student' %}violet{% elif role_stat.role == 'teacher' %}mint{% elif role_stat.role == 'admin' %}orange{% else %}blue{% endif %}">
+      <div class="stat-icon">
+        <i class="fa-solid fa-{% if role_stat.role == 'student' %}user-graduate{% elif role_stat.role == 'teacher' %}chalkboard-user{% elif role_stat.role == 'admin' %}shield-halved{% else %}user{% endif %}"></i>
+      </div>
+      <div class="stat-value">{{ role_stat.count }}</div>
+      <div class="stat-label">{{ role_stat.role|capfirst }}s</div>
+    </div>
+  </div>
+  {% endfor %}
+  <div class="col-6 col-lg-3 animate-in animate-in-d3">
+    <div class="stat-card orange">
+      <div class="stat-icon"><i class="fa-solid fa-book-open"></i></div>
+      <div class="stat-value">{{ stats.total_courses }}</div>
+      <div class="stat-label">Cours au total</div>
+      <div class="stat-trend up"><i class="fa-solid fa-circle-check"></i> {{ stats.published_courses }} publiés</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3 animate-in animate-in-d4">
+    <div class="stat-card blue">
+      <div class="stat-icon"><i class="fa-solid fa-circle-play"></i></div>
+      <div class="stat-value">{{ stats.active_sessions }}</div>
+      <div class="stat-label">Sessions live actives</div>
+      {% if stats.active_sessions > 0 %}<div class="stat-trend up"><span class="live-dot"></span> En direct</div>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <!-- RECENT USERS -->
+    <div class="glass-card p-4 animate-in animate-in-d1">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-users"></i></div>
+          Derniers inscrits
+        </div>
+        <a href="{% url 'accounts:user_list' %}" class="btn-ghost" style="font-size:.78rem;padding:7px 14px;">Voir tous</a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Utilisateur</th><th>Rôle</th><th>Niveau</th><th>Inscription</th><th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in stats.recent_users %}
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--mint));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0;">
+                    {{ user.first_name|first|default:user.username|first|upper }}
+                  </div>
+                  <div>
+                    <div style="font-weight:600;font-size:.83rem;color:var(--text-primary);">{{ user.get_full_name|default:user.username }}</div>
+                    <div style="font-size:.7rem;color:var(--text-muted);">{{ user.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="pill {% if user.role == 'teacher' %}pill-mint{% elif user.role == 'admin' %}pill-orange{% else %}pill-violet{% endif %}">
+                  {{ user.get_role_display }}
+                </span>
+              </td>
+              <td><span style="font-size:.8rem;color:var(--text-secondary);">{{ user.level|default:"—" }}</span></td>
+              <td><span style="font-size:.75rem;color:var(--text-muted);">{{ user.date_joined|date:"d M Y" }}</span></td>
+              <td>
+                {% if user.is_active %}
+                <span class="pill pill-mint" style="font-size:.65rem;"><i class="fa-solid fa-circle"></i> Actif</span>
+                {% else %}
+                <span class="pill pill-muted" style="font-size:.65rem;"><i class="fa-regular fa-circle"></i> Inactif</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px;">Aucun utilisateur</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <!-- PLATFORM HEALTH -->
+    <div class="glass-card p-4 animate-in animate-in-d2 mb-4">
+    <div class="section-title mb-4">
+        <div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-heart-pulse"></i></div>
+        Santé de la plateforme
+    </div>
+    <div class="d-flex flex-column gap-3">
+        <div>
+            <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;">
+                <span style="color:var(--text-secondary);">Cours publiés</span>
+                <span style="color:var(--text-primary);font-weight:600;">{{ stats.published_courses }} / {{ stats.total_courses }}</span>
+            </div>
+            <div class="progress-dark"><div class="bar" data-width="{% if stats.total_courses %}{% widthratio stats.published_courses stats.total_courses 100 %}{% else %}0{% endif %}" style="width:0;"></div></div>
+        </div>
+        <div>
+            <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;">
+                <span style="color:var(--text-secondary);">Sessions live</span>
+                <span style="color:var(--text-primary);font-weight:600;">{{ stats.active_sessions }} actives</span>
+            </div>
+            <div class="progress-dark" style="height:6px;border-radius:99px;background:rgba(255,255,255,.07);">
+                <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--red),var(--orange));width:{% if stats.active_sessions %}60{% else %}0{% endif %}%;transition:width 1s ease;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- QUICK LINKS -->
+    <div class="glass-card p-4 animate-in animate-in-d3">
+    <div class="section-title mb-3">
+        <div class="section-title-icon" style="background:var(--orange-dim);color:var(--orange);">
+            <i class="fa-solid fa-link"></i>
+        </div> 
+        Accès rapide
+    </div>
+    <div class="d-flex flex-column gap-2">
+        <a href="{% url 'accounts:user_list' %}" class="nav-item-link" style="border:1px solid var(--border);border-radius:var(--radius-sm);">
+            <div class="nav-item-icon"><i class="fa-solid fa-users"></i></div>
+            <span>Gestion utilisateurs</span>
+        </a>
+        <a href="{% url 'courses:list' %}" class="nav-item-link" style="border:1px solid var(--border);border-radius:var(--radius-sm);">
+            <div class="nav-item-icon"><i class="fa-solid fa-book-open"></i></div>
+            <span>Tous les cours</span>
+        </a>
+        <a href="{% url 'live_stream:list' %}" class="nav-item-link" style="border:1px solid var(--border);border-radius:var(--radius-sm);">
+            <div class="nav-item-icon"><i class="fa-solid fa-video"></i></div>
+            <span>Sessions live</span>
+        </a>
+        <a href="{% url 'ai_tools:gallery' %}" class="nav-item-link" style="border:1px solid var(--border);border-radius:var(--radius-sm);">
+            <div class="nav-item-icon"><i class="fa-solid fa-grid-2"></i></div>
+            <span>Galerie projets</span>
+        </a>
+        <a href="{% url 'admin:index' %}" target="_blank" class="nav-item-link" style="border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--orange);">
+            <div class="nav-item-icon" style="color:var(--orange);"><i class="fa-solid fa-gear"></i></div>
+            <span>Admin Django ↗</span>
+        </a>
+    </div>
+</div>
+  </div>
+</div>
+{% endblock %}

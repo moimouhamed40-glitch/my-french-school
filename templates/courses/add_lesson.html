@@ -1,0 +1,235 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Ajouter une leçon — École FLE{% endblock %}
+{% block breadcrumb %}Ajouter une leçon{% endblock %}
+
+{% block nav_courses %}active{% endblock %}
+
+{% block content %}
+
+<style>
+.glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s;
+}
+.glass-card:hover {
+    border-color: var(--border-glow);
+}
+.section-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.section-title-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    font-size: .8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-ghost:hover {
+    border-color: var(--violet);
+    color: var(--violet-light);
+}
+.btn-primary-gradient {
+    background: linear-gradient(135deg, var(--violet), var(--violet-light));
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-primary-gradient:hover {
+    box-shadow: 0 6px 24px rgba(108,62,255,.4);
+    color: #fff;
+}
+.page-header {
+    margin-bottom: 28px;
+}
+.page-eyebrow {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--violet-light);
+    margin-bottom: 6px;
+}
+.page-title {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    color: var(--text-primary);
+    line-height: 1.15;
+}
+.page-subtitle {
+    color: var(--text-muted);
+    font-size: .88rem;
+    margin-top: 6px;
+}
+.form-label-dark {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    display: block;
+}
+.form-control-dark,
+.form-select-dark {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important;
+    border-radius: 10px !important;
+    padding: 10px 14px;
+    font-family: var(--font-body);
+    font-size: .85rem;
+    transition: border-color 0.3s !important;
+}
+.form-control-dark:focus,
+.form-select-dark:focus {
+    border-color: var(--violet) !important;
+    box-shadow: 0 0 0 3px rgba(108,62,255,.15) !important;
+    outline: none;
+}
+.form-control-dark::placeholder {
+    color: var(--text-muted);
+}
+</style>
+
+<div class="page-header animate-in">
+    <div class="page-eyebrow"><i class="fa-solid fa-plus me-2" style="color:var(--violet);"></i>Gestion de cours</div>
+    <h1 class="page-title">📝 Ajouter une leçon</h1>
+    <p class="page-subtitle">Ajoutez une nouvelle leçon au cours <strong>{{ course.title }}</strong>.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8 animate-in animate-in-d1">
+        <div class="glass-card p-4">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label-dark">Titre de la leçon</label>
+                    <input type="text" name="title" class="form-control-dark" placeholder="Ex: Introduction au subjonctif" style="width:100%;" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Type de leçon</label>
+                    <select name="lesson_type" class="form-select-dark" style="width:100%;">
+                        <option value="video">Vidéo</option>
+                        <option value="exercise">Exercice</option>
+                        <option value="text">Texte</option>
+                        <option value="quiz">Quiz</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Description</label>
+                    <textarea name="description" class="form-control-dark" rows="4" placeholder="Décrivez le contenu de cette leçon..." style="width:100%;resize:vertical;"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Contenu / Texte</label>
+                    <textarea name="content" class="form-control-dark" rows="6" placeholder="Contenu textuel de la leçon..." style="width:100%;resize:vertical;"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">URL de la vidéo (YouTube / Vimeo)</label>
+                    <input type="url" name="video_url" class="form-control-dark" placeholder="https://www.youtube.com/watch?v=..." style="width:100%;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Fichier vidéo</label>
+                    <input type="file" name="video_file" class="form-control-dark" accept="video/*" style="width:100%;padding:8px;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Durée (minutes)</label>
+                    <input type="number" name="duration_minutes" class="form-control-dark" value="15" min="1" max="180" style="width:100%;">
+                </div>
+                <div class="mb-3" style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" name="is_free_preview" id="is_free_preview" style="width:18px;height:18px;accent-color:var(--violet);">
+                    <label for="is_free_preview" style="font-size:.85rem;color:var(--text-secondary);cursor:pointer;">
+                        Aperçu gratuit
+                    </label>
+                </div>
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn-primary-gradient" style="padding:12px 28px;"><i class="fa-solid fa-plus"></i> Ajouter la leçon</button>
+                    <a href="{% url 'courses:detail' course.slug %}" class="btn-ghost" style="padding:12px 20px;"><i class="fa-solid fa-xmark"></i> Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-4 animate-in animate-in-d2">
+        <div class="glass-card p-4 mb-4">
+            <div class="section-title">
+                <div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-lightbulb"></i></div>
+                Types de leçon
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);">
+                    <i class="fa-solid fa-play" style="color:var(--violet);font-size:1.1rem;width:20px;"></i>
+                    <div>
+                        <div style="font-weight:600;font-size:.85rem;color:var(--text-primary);">Vidéo</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Cours en vidéo YouTube ou téléversé</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);">
+                    <i class="fa-solid fa-pencil" style="color:var(--mint);font-size:1.1rem;width:20px;"></i>
+                    <div>
+                        <div style="font-weight:600;font-size:.85rem;color:var(--text-primary);">Exercice</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Activités pratiques interactives</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);">
+                    <i class="fa-regular fa-file-lines" style="color:var(--orange);font-size:1.1rem;width:20px;"></i>
+                    <div>
+                        <div style="font-weight:600;font-size:.85rem;color:var(--text-primary);">Texte</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Contenu écrit avec formatage</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);">
+                    <i class="fa-regular fa-clipboard-question" style="color:var(--blue);font-size:1.1rem;width:20px;"></i>
+                    <div>
+                        <div style="font-weight:600;font-size:.85rem;color:var(--text-primary);">Quiz</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Questions et évaluation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-4">
+            <div class="section-title">
+                <div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-robot"></i></div>
+                Astuce IA
+            </div>
+            <p style="font-size:.82rem;color:var(--text-muted);line-height:1.7;">Utilisez le générateur d'exercices pour créer automatiquement des exercices adaptés à votre leçon.</p>
+            <a href="{% url 'ai_tools:exercise_generator' %}" class="btn-primary-gradient" style="font-size:.82rem;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-bolt"></i> Générateur IA
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

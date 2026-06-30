@@ -1,0 +1,141 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Mon Profil{% endblock %}
+{% block breadcrumb %}Mon Profil{% endblock %}
+{% block content %}
+<div class="page-header animate-in">
+  <div class="page-eyebrow"><i class="fa-solid fa-user me-2"></i>Compte</div>
+  <h1 class="page-title">Mon Profil</h1>
+  <p class="page-subtitle">Gérez vos informations personnelles et vos préférences.</p>
+</div>
+<div class="row g-4">
+  <!-- AVATAR + IDENTITY -->
+  <div class="col-lg-4">
+    <div class="glass-card p-4 animate-in text-center mb-4">
+      <div style="position:relative;display:inline-block;margin-bottom:20px;">
+        <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--mint));display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:800;color:#fff;border:4px solid var(--border-glow);box-shadow:var(--shadow-glow);margin:0 auto;">
+          {{ request.user.first_name|first|default:request.user.username|first|upper }}
+        </div>
+        <label style="position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-surface);">
+          <i class="fa-solid fa-camera" style="font-size:.6rem;color:#fff;"></i>
+          <input type="file" accept="image/*" style="display:none;">
+        </label>
+      </div>
+      <div style="font-family:var(--font-display);font-weight:800;font-size:1.1rem;color:var(--text-primary);">{{ request.user.get_full_name|default:request.user.username }}</div>
+      <div style="font-size:.78rem;color:var(--mint);font-weight:600;margin-top:4px;">
+        <i class="fa-solid fa-circle me-1" style="font-size:.5rem;"></i>
+        {% if request.user.is_teacher %}Enseignant{% elif request.user.is_platform_admin %}Administrateur{% else %}Élève · {{ request.user.level }}{% endif %}
+      </div>
+      <div style="font-size:.73rem;color:var(--text-muted);margin-top:6px;">{{ request.user.email }}</div>
+      <div class="divider"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center;">
+        <div><div style="font-size:1.1rem;font-weight:800;color:var(--violet-light);">{{ request.user.date_joined|date:"Y" }}</div><div style="font-size:.68rem;color:var(--text-muted);">Membre depuis</div></div>
+        <div><div style="font-size:1.1rem;font-weight:800;color:var(--mint);">{{ request.user.level|default:"—" }}</div><div style="font-size:.68rem;color:var(--text-muted);">Niveau actuel</div></div>
+      </div>
+    </div>
+    <!-- PREFERENCES -->
+    <div class="glass-card p-4 animate-in animate-in-d2">
+      <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--orange-dim);color:var(--orange);"><i class="fa-solid fa-sliders"></i></div> Préférences</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:.82rem;color:var(--text-secondary);"><i class="fa-solid fa-globe me-2" style="color:var(--violet-light);"></i>Langue</span>
+          <span class="pill {% if request.user.preferred_language == 'fr' %}pill-violet{% else %}pill-mint{% endif %}">{% if request.user.preferred_language == 'fr' %}🇫🇷 Français{% else %}🇩🇿 عربية{% endif %}</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:.82rem;color:var(--text-secondary);"><i class="fa-solid fa-graduation-cap me-2" style="color:var(--mint);"></i>Niveau CECRL</span>
+          <span class="pill pill-mint">{{ request.user.level|default:"Non défini" }}</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:.82rem;color:var(--text-secondary);"><i class="fa-solid fa-envelope me-2" style="color:var(--orange);"></i>Email vérifié</span>
+          {% if request.user.is_email_verified %}<span class="pill pill-mint"><i class="fa-solid fa-check"></i> Oui</span>{% else %}<span class="pill pill-orange"><i class="fa-solid fa-triangle-exclamation"></i> Non</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- EDIT FORM -->
+  <div class="col-lg-8">
+    <div class="glass-card p-4 animate-in animate-in-d1">
+      <div class="section-title mb-4"><div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-pen-to-square"></i></div> Informations personnelles</div>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label-dark">Prénom</label>
+            {{ form.first_name }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-dark">Nom</label>
+            {{ form.last_name }}
+          </div>
+          <div class="col-12">
+            <label class="form-label-dark">Email</label>
+            {{ form.email }}
+          </div>
+          <div class="col-12">
+            <label class="form-label-dark">Biographie</label>
+            {{ form.bio }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-dark">Téléphone</label>
+            {{ form.phone }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-dark">Date de naissance</label>
+            {{ form.date_of_birth }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-dark">Langue préférée</label>
+            {{ form.preferred_language }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-dark">Niveau</label>
+            {{ form.level }}
+          </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert-dark error mt-3"><i class="fa-solid fa-circle-xmark"></i> Veuillez corriger les erreurs ci-dessus.</div>
+        {% endif %}
+        <div class="d-flex gap-3 mt-4">
+          <button type="submit" class="btn-primary-gradient"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder</button>
+          <a href="{% url 'accounts:dashboard' %}" class="btn-ghost"><i class="fa-solid fa-xmark"></i> Annuler</a>
+        </div>
+      </form>
+    </div>
+    {% if role_form %}
+    <div class="glass-card p-4 mt-4 animate-in animate-in-d2">
+      <div class="section-title mb-4"><div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-id-card"></i></div> Profil {% if request.user.is_teacher %}Enseignant{% else %}Élève{% endif %}</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          {% for field in role_form %}
+          <div class="col-md-6">
+            <label class="form-label-dark">{{ field.label }}</label>
+            {{ field }}
+          </div>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn-mint mt-3"><i class="fa-solid fa-floppy-disk"></i> Mettre à jour</button>
+      </form>
+    </div>
+    {% endif %}
+    <!-- SECURITY -->
+    <div class="glass-card p-4 mt-4 animate-in animate-in-d3">
+      <div class="section-title mb-4"><div class="section-title-icon" style="background:var(--orange-dim);color:var(--orange);"><i class="fa-solid fa-lock"></i></div> Sécurité</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg-card);">
+        <div>
+          <div style="font-weight:600;font-size:.85rem;color:var(--text-primary);">Mot de passe</div>
+          <div style="font-size:.75rem;color:var(--text-muted);">Dernière modification: inconnue</div>
+        </div>
+        <a href="#" class="btn-ghost" style="font-size:.78rem;padding:7px 14px;"><i class="fa-solid fa-key"></i> Modifier</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<style>
+input, textarea, select { background:var(--bg-card)!important;border:1px solid var(--border)!important;color:var(--text-primary)!important;border-radius:10px!important;padding:10px 14px!important;font-family:var(--font-body)!important;font-size:.85rem!important;width:100%!important;transition:border-color var(--transition)!important; }
+input:focus, textarea:focus, select:focus { border-color:var(--violet)!important;box-shadow:0 0 0 3px rgba(108,62,255,.15)!important;outline:none!important; }
+input::placeholder, textarea::placeholder { color:var(--text-muted)!important; }
+select option { background:var(--bg-card)!important;color:var(--text-primary)!important; }
+</style>
+{% endblock %}

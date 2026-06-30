@@ -1,0 +1,78 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}{{ thread.title }}{% endblock %}
+{% block breadcrumb %}{{ thread.title|truncatechars:30 }}{% endblock %}
+{% block nav_forum %}active{% endblock %}
+{% block content %}
+<div class="animate-in">
+  <a href="{% url 'courses:forum' %}" style="font-size:.8rem;color:var(--text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;"><i class="fa-solid fa-arrow-left"></i> Retour au forum</a>
+</div>
+<div class="row g-4">
+  <div class="col-lg-8">
+    <!-- ORIGINAL POST -->
+    <div class="glass-card p-5 mb-4 animate-in">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        {% if thread.is_pinned %}<span class="pill pill-orange" style="font-size:.65rem;"><i class="fa-solid fa-thumbtack"></i> Épinglé</span>{% endif %}
+        {% if thread.is_closed %}<span class="pill pill-muted" style="font-size:.65rem;"><i class="fa-solid fa-lock"></i> Fermé</span>{% endif %}
+      </div>
+      <h1 style="font-family:var(--font-display);font-weight:800;font-size:1.5rem;letter-spacing:-.03em;color:var(--text-primary);margin-bottom:16px;line-height:1.3;">{{ thread.title }}</h1>
+      <div style="line-height:1.8;color:var(--text-secondary);font-size:.9rem;margin-bottom:24px;">{{ thread.body|linebreaks }}</div>
+      <div style="display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--border);">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--mint));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;">{{ thread.author.first_name|first|default:thread.author.username|first|upper }}</div>
+        <div>
+          <div style="font-weight:600;font-size:.83rem;color:var(--text-primary);">{{ thread.author.get_full_name|default:thread.author.username }}</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">{{ thread.created_at|date:"d M Y à H:i" }}</div>
+        </div>
+        <span class="pill {% if thread.author.is_teacher %}pill-mint{% else %}pill-violet{% endif %}" style="font-size:.65rem;margin-left:auto;">{{ thread.author.get_role_display }}</span>
+      </div>
+    </div>
+    <!-- REPLIES -->
+    {% if replies %}
+    <div style="margin-bottom:20px;">
+      <p style="font-size:.78rem;color:var(--text-muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:12px;"><i class="fa-solid fa-comments me-2"></i>{{ replies.count }} réponse{{ replies.count|pluralize }}</p>
+      {% for reply in replies %}
+      <div class="glass-card p-4 mb-3 animate-in {% if reply.is_answer %}border border-success{% endif %}" style="{% if reply.is_answer %}border-color:var(--mint)!important;{% endif %}">
+        {% if reply.is_answer %}<div style="font-size:.72rem;color:var(--mint);font-weight:700;margin-bottom:10px;"><i class="fa-solid fa-circle-check me-1"></i> Réponse acceptée</div>{% endif %}
+        <div style="line-height:1.8;color:var(--text-secondary);font-size:.87rem;margin-bottom:16px;">{{ reply.body|linebreaks }}</div>
+        <div style="display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--border);">
+          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--gold));display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;">{{ reply.author.first_name|first|default:reply.author.username|first|upper }}</div>
+          <span style="font-size:.78rem;color:var(--text-secondary);font-weight:500;">{{ reply.author.get_full_name|default:reply.author.username }}</span>
+          <span style="font-size:.7rem;color:var(--text-muted);">· {{ reply.created_at|timesince }}</span>
+          {% if reply.author.is_teacher %}<span class="pill pill-mint" style="font-size:.6rem;">Enseignant</span>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <!-- REPLY FORM -->
+    {% if not thread.is_closed %}
+    <div class="glass-card p-4 animate-in animate-in-d2">
+      <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-reply"></i></div> Votre réponse</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <textarea name="body" rows="5" placeholder="Rédigez votre réponse…" required style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);border-radius:10px;padding:14px;font-size:.87rem;width:100%;font-family:var(--font-body);resize:vertical;transition:border-color var(--transition);" onfocus="this.style.borderColor='var(--violet)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+        <div class="d-flex gap-3">
+          <button type="submit" class="btn-primary-gradient"><i class="fa-solid fa-paper-plane"></i> Publier</button>
+          <a href="{% url 'courses:forum' %}" class="btn-ghost"><i class="fa-solid fa-xmark"></i> Annuler</a>
+        </div>
+      </form>
+    </div>
+    {% else %}
+    <div class="alert-dark info animate-in animate-in-d2"><i class="fa-solid fa-lock"></i> Cette discussion est fermée. Vous ne pouvez plus y répondre.</div>
+    {% endif %}
+  </div>
+  <!-- SIDEBAR -->
+  <div class="col-lg-4 animate-in animate-in-d2">
+    <div class="glass-card p-4">
+      <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-circle-info"></i></div> Discussion</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:.82rem;">
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Réponses</span><span class="pill pill-violet">{{ replies.count }}</span></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Créée le</span><span style="color:var(--text-secondary);">{{ thread.created_at|date:"d M Y" }}</span></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Auteur</span><span style="color:var(--text-secondary);">{{ thread.author.username }}</span></div>
+        {% if thread.course %}<div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Cours</span><a href="{{ thread.course.get_absolute_url }}" style="color:var(--violet-light);font-size:.78rem;">{{ thread.course.title|truncatechars:20 }}</a></div>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

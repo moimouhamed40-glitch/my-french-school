@@ -1,0 +1,268 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load extras %}
+
+{% block title %}{{ lesson.title }} — École FLE{% endblock %}
+{% block breadcrumb %}{{ lesson.title }}{% endblock %}
+
+{% block nav_courses %}active{% endblock %}
+
+{% block content %}
+
+<style>
+.glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s;
+}
+.glass-card:hover {
+    border-color: var(--border-glow);
+}
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+.section-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.section-title-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    font-size: .8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.progress-dark {
+    background: rgba(255,255,255,.07);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+}
+.progress-dark .bar {
+    background: linear-gradient(90deg, var(--violet), var(--mint));
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s ease;
+}
+.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-ghost:hover {
+    border-color: var(--violet);
+    color: var(--violet-light);
+}
+.btn-primary-gradient {
+    background: linear-gradient(135deg, var(--violet), var(--violet-light));
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-primary-gradient:hover {
+    box-shadow: 0 6px 24px rgba(108,62,255,.4);
+    color: #fff;
+}
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+.pill-mint {
+    background: rgba(0,212,170,.15);
+    color: var(--mint);
+}
+.page-header {
+    margin-bottom: 28px;
+}
+.page-eyebrow {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--violet-light);
+    margin-bottom: 6px;
+}
+.page-title {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    color: var(--text-primary);
+    line-height: 1.15;
+}
+.page-subtitle {
+    color: var(--text-muted);
+    font-size: .88rem;
+    margin-top: 6px;
+}
+</style>
+
+<div class="page-header animate-in">
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+        <div>
+            <div class="page-eyebrow">
+                <i class="fa-solid fa-book-open me-2" style="color:var(--violet);"></i>
+                {{ course.title }} · Leçon {{ lesson.order }}
+            </div>
+            <h1 class="page-title">{{ lesson.title }}</h1>
+            <p class="page-subtitle">{{ lesson.description }}</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'courses:detail' course.slug %}" class="btn-ghost"><i class="fa-solid fa-arrow-left"></i> Retour</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Main content -->
+    <div class="col-lg-8 animate-in animate-in-d1">
+        <div class="glass-card p-4 mb-4">
+            <!-- Contenu de la leçon -->
+            {% if lesson.lesson_type == 'video' %}
+                {% if lesson.video_url %}
+                <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:var(--radius-md);background:var(--bg-card);">
+                    <iframe 
+                        src="{{ lesson.video_url|embed_url }}" 
+                        style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                {% elif lesson.video_file %}
+                <video controls style="width:100%;border-radius:var(--radius-md);">
+                    <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                </video>
+                {% else %}
+                <div style="text-align:center;padding:60px 20px;color:var(--text-muted);background:var(--bg-card);border-radius:var(--radius-md);">
+                    <i class="fa-solid fa-video" style="font-size:3rem;opacity:.2;display:block;margin-bottom:16px;"></i>
+                    <p>Aucune vidéo disponible pour cette leçon.</p>
+                </div>
+                {% endif %}
+            {% elif lesson.lesson_type == 'text' %}
+                <div style="color:var(--text-secondary);font-size:.95rem;line-height:1.8;white-space:pre-wrap;">
+                    {{ lesson.content|linebreaks }}
+                </div>
+            {% else %}
+                <div style="text-align:center;padding:60px 20px;color:var(--text-muted);background:var(--bg-card);border-radius:var(--radius-md);">
+                    <i class="fa-regular fa-file-lines" style="font-size:3rem;opacity:.2;display:block;margin-bottom:16px;"></i>
+                    <p>Contenu de la leçon à venir.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Exercices -->
+        {% if exercises %}
+        <div class="glass-card p-4 mb-4">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                    </div>
+                    Exercices
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                {% for exercise in exercises %}
+                <div style="padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg-card);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <div>
+                            <div style="font-weight:600;font-size:.9rem;color:var(--text-primary);">{{ exercise.title }}</div>
+                            <div style="font-size:.7rem;color:var(--text-muted);">
+                                {{ exercise.get_exercise_type_display }} · {{ exercise.points }} points
+                                {% if exercise.id in submitted_ids %}
+                                <span class="pill pill-mint" style="font-size:.6rem;"><i class="fa-solid fa-circle-check"></i> Fait</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <a href="{% url 'courses:submit_exercise' exercise.id %}" class="btn-ghost" style="font-size:.75rem;padding:4px 12px;">
+                            {% if exercise.id in submitted_ids %}Voir{% else %}Commencer{% endif %}
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Navigation entre les leçons -->
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            {% if prev_lesson %}
+            <a href="{% url 'courses:lesson' course.slug prev_lesson.id %}" class="btn-ghost"><i class="fa-solid fa-arrow-left"></i> Leçon précédente</a>
+            {% else %}
+            <span></span>
+            {% endif %}
+            {% if next_lesson %}
+            <a href="{% url 'courses:lesson' course.slug next_lesson.id %}" class="btn-primary-gradient">Leçon suivante <i class="fa-solid fa-arrow-right"></i></a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4 animate-in animate-in-d2">
+        <div class="glass-card p-4 mb-4">
+            <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-list"></i></div> Leçons du cours</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                {% for l in all_lessons %}
+                <a href="{% url 'courses:lesson' course.slug l.id %}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-sm);{% if l.id == lesson.id %}background:var(--violet-dim);border:1px solid var(--border-glow);{% else %}border:1px solid var(--border);{% endif %}text-decoration:none;color:inherit;transition:all var(--transition);">
+                    <span style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;{% if l.id == lesson.id %}background:var(--violet);color:#fff;{% else %}background:var(--bg-surface);color:var(--text-muted);{% endif %}font-size:.65rem;font-weight:700;flex-shrink:0;">{{ forloop.counter }}</span>
+                    <span style="font-size:.8rem;{% if l.id == lesson.id %}font-weight:600;color:var(--text-primary);{% else %}color:var(--text-secondary);{% endif %}">{{ l.title|truncatechars:25 }}</span>
+                    {% if l.is_free_preview %}<span class="pill pill-mint" style="font-size:.5rem;margin-left:auto;">Aperçu</span>{% endif %}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="glass-card p-4">
+            <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-regular fa-clock"></i></div> Progression</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;justify-content:space-between;font-size:.82rem;">
+                    <span style="color:var(--text-muted);">Leçons complétées</span>
+                    <span style="color:var(--text-primary);font-weight:600;">{{ progress_count|default:0 }}/{{ all_lessons|length }}</span>
+                </div>
+                <div class="progress-dark" style="height:6px;">
+                    <div class="bar" data-width="{% if all_lessons|length > 0 %}{% widthratio progress_count all_lessons|length 100 %}{% else %}0{% endif %}" style="width:0%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.bar[data-width]').forEach(el => {
+    setTimeout(() => { el.style.width = el.dataset.width + '%'; }, 300);
+});
+</script>
+{% endblock %}

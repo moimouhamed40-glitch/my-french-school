@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ session.title }} — Session Live{% endblock %}
+{% block main_class %}{% endblock %}
+
+{% block content %}
+<div class="live-room d-flex flex-column" style="height:100vh; background:#0a0a0a; color:#fff; overflow:hidden;">
+
+  <!-- TOP BAR -->
+  <div class="live-topbar d-flex align-items-center justify-content-between px-3 py-2" style="background:#111; border-bottom:1px solid #222; height:56px;">
+    <div class="d-flex align-items-center gap-3">
+      <span class="badge bg-danger px-3 py-2 fs-6 animate-pulse">
+        <i class="bi bi-record-circle-fill me-1"></i> LIVE
+      </span>
+      <h6 class="mb-0 text-white fw-semibold">{{ session.title }}</h6>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-muted small"><i class="bi bi-people"></i> <span id="participantCount">0</span></span>
+      <span class="text-muted small" id="sessionTimer">00:00:00</span>
+      {% if is_host %}
+      <button class="btn btn-danger btn-sm" id="endSessionBtn">
+        <i class="bi bi-stop-circle me-1"></i>Terminer
+      </button>
+      {% else %}
+      <a href="{% url 'live_stream:list' %}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-box-arrow-left me-1"></i>Quitter
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="d-flex flex-grow-1 overflow-hidden">
+
+    <!-- VIDEO GRID -->
+    <div class="flex-grow-1 d-flex flex-column" style="background:#111;">
+      <div id="videoGrid" class="flex-grow-1 p-2 d-flex flex-wrap gap-2 align-content-start overflow-auto" style="min-height:0;">
+        <!-- Agora video tiles will be appended here by JS -->
+        <div id="localVideoContainer" class="video-tile position-relative" style="width:280px; height:200px; background:#1a1a1a; border-radius:12px; overflow:hidden;">
+          <div id="local-video" class="w-100 h-100"></div>
+          <div class="position-absolute bottom-0 start-0 m-2">
+            <span class="badge bg-dark bg-opacity-75">
+              <i class="bi bi-person-fill me-1"></i>Vous {% if is_host %}(Enseignant){% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WHITEBOARD (toggle) -->
+      <div id="whiteboardArea" class="d-none flex-grow-1 p-2" style="background:#fff;">
+        <canvas id="whiteboardCanvas" style="width:100%; height:100%; cursor:crosshair; border:1px solid #ddd; border-radius:8px;"></canvas>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="live-controls d-flex align-items-center justify-content-center gap-3 py-3" style="background:#1a1a1a; border-top:1px solid #222;">
+        <button class="ctrl-btn btn btn-dark rounded-circle p-3" id="toggleMic" title="Micro">
+          <i class="bi bi-mic-fill fs-5"></i>
+        </button>
+        <button class="ctrl-btn btn btn-dark rounded-circle p-3" id="toggleCamera" title="Caméra">
+          <i class="bi bi-camera-video-fill fs-5"></i>
+        </button>
+        <button class="ctrl-btn btn btn-dark rounded-circle p-3" id="toggleScreen" title="Partager l'écran">
+          <i class="bi bi-display fs-5"></i>
+        </button>
+        <button class="ctrl-btn btn btn-dark rounded-circle p-3" id="toggleWhiteboard" title="Tableau blanc">
+          <i class="bi bi-pencil-square fs-5"></i>
+        </button>
+        <button class="ctrl-btn btn btn-dark rounded-circle p-3" id="raiseHandBtn" title="Lever la main">
+          <i class="bi bi-hand-index-thumb fs-5"></i>
+        </button>
+        {% if is_host %}
+        <button class="ctrl-btn btn btn-warning rounded-circle p-3" id="createPollBtn" title="Créer un sondage">
+          <i class="bi bi-bar-chart-fill fs-5"></i>
+        </button>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- SIDEBAR: CHAT + PARTICIPANTS -->
+    <div class="live-sidebar d-flex flex-column" style="width:320px; background:#161616; border-left:1px solid #222;">
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs nav-fill border-0 px-2 pt-2" id="sidebarTabs">
+        <li class="nav-item">
+          <button class="nav-link active text-white" data-bs-toggle="tab" data-bs-target="#chatTab">
+            <i class="bi bi-chat-dots me-1"></i>Chat
+            <span class="badge bg-danger ms-1 d-none" id="chatBadge">0</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#participantsTab">
+            <i class="bi bi-people me-1"></i>Participants
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#pollsTab">
+            <i class="bi bi-bar-chart me-1"></i>Sondages
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content flex-grow-1 d-flex flex-column overflow-hidden" style="min-height:0;">
+
+        <!-- CHAT TAB -->
+        <div class="tab-pane fade show active flex-column h-100" id="chatTab" style="display:flex !important;">
+          <div id="chatMessages" class="flex-grow-1 overflow-auto p-3 d-flex flex-column gap-2" style="min-height:0;">
+            <!-- Messages will be appended here -->
+          </div>
+          <div class="chat-input p-2 border-top border-secondary">
+            <div class="input-group">
+              <input type="text" id="chatInput" class="form-control bg-dark text-white border-secondary"
+                     placeholder="Écrire un message..." maxlength="500">
+              <button class="btn btn-primary" id="sendChat">
+                <i class="bi bi-send-fill"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PARTICIPANTS TAB -->
+        <div class="tab-pane fade p-3 overflow-auto" id="participantsTab">
+          <ul id="participantsList" class="list-unstyled d-flex flex-column gap-2">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+
+        <!-- POLLS TAB -->
+        <div class="tab-pane fade p-3 overflow-auto" id="pollsTab">
+          <div id="activePoll" class="d-none mb-3">
+            <!-- Active poll UI -->
+          </div>
+          <div id="pollHistory" class="d-flex flex-column gap-2">
+            <p class="text-muted small text-center mt-4">Aucun sondage actif</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE POLL MODAL -->
+{% if is_host %}
+<div class="modal fade" id="pollModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title"><i class="bi bi-bar-chart me-2"></i>Créer un sondage</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Question</label>
+          <input type="text" id="pollQuestion" class="form-control bg-secondary text-white border-0" placeholder="Votre question...">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Type</label>
+          <select id="pollType" class="form-select bg-secondary text-white border-0">
+            <option value="yes_no">Oui / Non</option>
+            <option value="multiple">Choix multiple</option>
+          </select>
+        </div>
+        <div id="pollOptionsWrapper" class="d-none">
+          <label class="form-label">Options (une par ligne)</label>
+          <textarea id="pollOptions" class="form-control bg-secondary text-white border-0" rows="4" placeholder="Option A&#10;Option B&#10;Option C"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn btn-warning fw-semibold" id="submitPoll">
+          <i class="bi bi-send me-1"></i>Lancer le sondage
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- END SESSION CONFIRM MODAL -->
+{% if is_host %}
+<div class="modal fade" id="endModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-body text-center py-4">
+        <i class="bi bi-stop-circle-fill text-danger fs-1 mb-3 d-block"></i>
+        <h5>Terminer la session ?</h5>
+        <p class="text-muted small">Tous les participants seront déconnectés.</p>
+        <div class="d-flex gap-2 justify-content-center mt-3">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button class="btn btn-danger fw-semibold" id="confirmEndBtn">Terminer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<!-- Agora Web SDK -->
+<script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+<script>
+  // Config from Django
+  const AGORA_APP_ID = "{{ agora_app_id }}";
+  const AGORA_CHANNEL = "{{ agora_channel }}";
+  const AGORA_TOKEN = "{{ agora_token }}";
+  const USER_ID = {{ user_id }};
+  const IS_HOST = {{ is_host|yesno:"true,false" }};
+  const SESSION_UID = "{{ session.uid }}";
+  const WS_URL = `ws://${window.location.host}/ws/live/${SESSION_UID}/`;
+</script>
+<script src="{% static 'js/live_stream.js' %}"></script>
+{% endblock %}

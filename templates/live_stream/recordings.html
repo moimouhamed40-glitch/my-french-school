@@ -1,0 +1,45 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Enregistrements{% endblock %}
+{% block breadcrumb %}Enregistrements{% endblock %}
+{% block nav_live %}active{% endblock %}
+{% block content %}
+<div class="page-header animate-in">
+  <div class="page-eyebrow"><i class="fa-solid fa-record-vinyl me-2"></i>Archives</div>
+  <h1 class="page-title">Enregistrements</h1>
+  <p class="page-subtitle">Toutes vos sessions live enregistrées.</p>
+</div>
+<div class="row g-4">
+  {% for session in sessions %}
+  <div class="col-md-6 col-xl-4 animate-in" style="animation-delay:{{ forloop.counter0 }}60ms;">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all var(--transition);" onmouseenter="this.style.borderColor='var(--border-glow)';this.style.transform='translateY(-3px)'" onmouseleave="this.style.borderColor='var(--border)';this.style.transform='none'">
+      <!-- Thumbnail -->
+      <div style="height:140px;background:linear-gradient(135deg,rgba(108,62,255,.2),rgba(0,212,170,.1));display:flex;align-items:center;justify-content:center;position:relative;">
+        <i class="fa-solid fa-circle-play" style="font-size:3rem;color:rgba(255,255,255,.3);"></i>
+        {% if session.recording.duration_seconds %}<span style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.7);color:#fff;font-size:.7rem;padding:3px 8px;border-radius:6px;font-family:var(--font-mono);">{% with d=session.recording.duration_seconds %}{{ d|floatformat:"0" }}s{% endwith %}</span>{% endif %}
+      </div>
+      <div style="padding:18px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span class="pill pill-muted" style="font-size:.62rem;"><i class="fa-solid fa-check"></i> Terminée</span>
+          {% if session.recording.file_size_mb %}<span class="pill pill-muted" style="font-size:.62rem;">{{ session.recording.file_size_mb }} MB</span>{% endif %}
+        </div>
+        <div style="font-family:var(--font-display);font-weight:700;font-size:.93rem;color:var(--text-primary);margin-bottom:8px;">{{ session.title }}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:14px;">
+          <i class="fa-regular fa-calendar me-1"></i>{{ session.ended_at|date:"d M Y"|default:"—" }}
+        </div>
+        <a href="{{ session.recording.file.url }}" class="btn-primary-gradient w-100 justify-content-center" style="font-size:.82rem;" target="_blank">
+          <i class="fa-solid fa-play"></i> Regarder
+        </a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12 animate-in">
+    <div class="glass-card p-5 text-center">
+      <i class="fa-solid fa-video-slash" style="font-size:3.5rem;opacity:.1;display:block;margin-bottom:16px;"></i>
+      <h5 style="color:var(--text-secondary);">Aucun enregistrement disponible.</h5>
+      <p style="color:var(--text-muted);font-size:.85rem;">Les enregistrements apparaissent ici après la fin d'une session live avec enregistrement activé.</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

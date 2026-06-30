@@ -1,0 +1,184 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Tableau de bord Enseignant{% endblock %}
+{% block breadcrumb %}Tableau de bord{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block content %}
+<div class="page-header animate-in">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+    <div>
+      <div class="page-eyebrow"><i class="fa-solid fa-chalkboard-user me-2"></i>Espace Enseignant</div>
+      <h1 class="page-title">Bonjour, {{ request.user.first_name|default:request.user.username }} <span style="color:var(--mint);">👋</span></h1>
+      <p class="page-subtitle">Gérez vos cours, créez du contenu avec l'IA, et animez vos sessions live.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'live_stream:create' %}" class="btn-mint"><i class="fa-solid fa-circle-play"></i> Lancer un live</a>
+      <a href="{% url 'courses:create' %}" class="btn-primary-gradient"><i class="fa-solid fa-plus"></i> Nouveau cours</a>
+    </div>
+  </div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3 animate-in animate-in-d1">
+    <div class="stat-card violet">
+      <div class="stat-icon"><i class="fa-solid fa-book-open"></i></div>
+      <div class="stat-value">{{ my_courses.count|default:"0" }}</div>
+      <div class="stat-label">Cours créés</div>
+      <div class="stat-trend up"><i class="fa-solid fa-arrow-trend-up"></i> Actifs</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3 animate-in animate-in-d2">
+    <div class="stat-card mint">
+      <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+      <div class="stat-value">{{ total_students|default:"0" }}</div>
+      <div class="stat-label">Élèves inscrits</div>
+      <div class="stat-trend up"><i class="fa-solid fa-arrow-trend-up"></i> +12%</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3 animate-in animate-in-d3">
+    <div class="stat-card orange">
+      <div class="stat-icon"><i class="fa-solid fa-video"></i></div>
+      <div class="stat-value">{{ my_sessions.count|default:"0" }}</div>
+      <div class="stat-label">Sessions live</div>
+      <div class="stat-trend up"><i class="fa-solid fa-circle"></i> Total</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3 animate-in animate-in-d4">
+    <div class="stat-card blue">
+      <div class="stat-icon"><i class="fa-solid fa-bolt"></i></div>
+      <div class="stat-value">{{ profile.total_students_taught|default:"0" }}</div>
+      <div class="stat-label">Élèves formés</div>
+      <div class="stat-trend up"><i class="fa-solid fa-award"></i> Carrière</div>
+    </div>
+  </div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="glass-card p-4 animate-in animate-in-d1">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-book-open"></i></div>
+          Mes cours
+        </div>
+        <a href="{% url 'courses:create' %}" class="btn-ghost" style="font-size:.78rem;padding:7px 14px;"><i class="fa-solid fa-plus"></i> Créer</a>
+      </div>
+      <div class="d-flex flex-column gap-3">
+        {% for course in my_courses %}
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;display:flex;align-items:center;gap:16px;transition:all var(--transition);" onmouseenter="this.style.borderColor='var(--border-glow)'" onmouseleave="this.style.borderColor='var(--border)'">
+          <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--violet-dim),var(--mint-dim));display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">📚</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <span class="course-level-badge level-{{ course.level|lower }}">{{ course.level }}</span>
+              {% if course.is_published %}<span class="pill pill-mint" style="font-size:.62rem;"><i class="fa-solid fa-circle-check"></i> Publié</span>{% else %}<span class="pill pill-muted" style="font-size:.62rem;"><i class="fa-regular fa-clock"></i> Brouillon</span>{% endif %}
+            </div>
+            <div style="font-weight:700;font-size:.87rem;color:var(--text-primary);margin-bottom:6px;">{{ course.title }}</div>
+            <div style="display:flex;align-items:center;gap:12px;font-size:.72rem;color:var(--text-muted);">
+              <span><i class="fa-solid fa-users" style="color:var(--violet-light);margin-right:4px;"></i>{{ course.student_count }} élève{{ course.student_count|pluralize }}</span>
+              <span><i class="fa-solid fa-layer-group" style="color:var(--mint);margin-right:4px;"></i>{{ course.total_lessons }} leçon{{ course.total_lessons|pluralize }}</span>
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-shrink-0">
+            <a href="{% url 'courses:edit' course.slug %}" class="topbar-btn" title="Modifier" style="width:34px;height:34px;font-size:.8rem;"><i class="fa-solid fa-pen-to-square"></i></a>
+            <a href="{{ course.get_absolute_url }}" class="topbar-btn" title="Voir" style="width:34px;height:34px;font-size:.8rem;"><i class="fa-solid fa-eye"></i></a>
+          </div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
+          <div style="font-size:3rem;margin-bottom:16px;opacity:.3;">📚</div>
+          <p style="font-size:.88rem;margin-bottom:16px;">Vous n'avez pas encore créé de cours.</p>
+          <a href="{% url 'courses:create' %}" class="btn-primary-gradient" style="font-size:.82rem;"><i class="fa-solid fa-plus"></i> Créer mon premier cours</a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="glass-card p-4 mt-4 animate-in animate-in-d2">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-robot"></i></div>
+          Outils IA rapides
+        </div>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <a href="{% url 'ai_tools:exercise_generator' %}" style="display:block;padding:18px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg-card);text-decoration:none;transition:all var(--transition);" onmouseenter="this.style.borderColor='var(--border-glow)';this.style.background='var(--violet-dim)'" onmouseleave="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--violet-dim);display:flex;align-items:center;justify-content:center;color:var(--violet-light);font-size:1rem;margin-bottom:12px;"><i class="fa-solid fa-bolt"></i></div>
+            <div style="font-weight:700;font-size:.87rem;color:var(--text-primary);margin-bottom:4px;">Générateur d'exercices</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Créez 10 exercices personnalisés en 10 secondes</div>
+          </a>
+        </div>
+        <div class="col-md-6">
+          <a href="{% url 'ai_tools:grammar_corrector' %}" style="display:block;padding:18px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg-card);text-decoration:none;transition:all var(--transition);" onmouseenter="this.style.borderColor='rgba(0,212,170,.4)';this.style.background='var(--mint-dim)'" onmouseleave="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--mint-dim);display:flex;align-items:center;justify-content:center;color:var(--mint);font-size:1rem;margin-bottom:12px;"><i class="fa-solid fa-spell-check"></i></div>
+            <div style="font-weight:700;font-size:.87rem;color:var(--text-primary);margin-bottom:4px;">Correcteur grammatical</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Analyse spaCy pour le français</div>
+          </a>
+        </div>
+        <div class="col-md-6">
+          <a href="{% url 'ai_tools:templates_lab' %}" style="display:block;padding:18px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg-card);text-decoration:none;transition:all var(--transition);" onmouseenter="this.style.borderColor='rgba(255,107,53,.4)';this.style.background='var(--orange-dim)'" onmouseleave="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--orange-dim);display:flex;align-items:center;justify-content:center;color:var(--orange);font-size:1rem;margin-bottom:12px;"><i class="fa-solid fa-layer-group"></i></div>
+            <div style="font-weight:700;font-size:.87rem;color:var(--text-primary);margin-bottom:4px;">Modèles IA</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Prompts prêts pour plans de cours et quiz</div>
+          </a>
+        </div>
+        <div class="col-md-6">
+          <a href="{% url 'ai_tools:training_hub' %}" style="display:block;padding:18px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg-card);text-decoration:none;transition:all var(--transition);" onmouseenter="this.style.borderColor='rgba(59,130,246,.4)';this.style.background='rgba(59,130,246,.08)'" onmouseleave="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(59,130,246,.15);display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:1rem;margin-bottom:12px;"><i class="fa-solid fa-brain"></i></div>
+            <div style="font-weight:700;font-size:.87rem;color:var(--text-primary);margin-bottom:4px;">Formation IA</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Vidéos sur ChatGPT, DALL·E, Text-to-Speech</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="glass-card p-4 animate-in animate-in-d2 mb-4">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-title-icon" style="background:rgba(239,68,68,.12);color:var(--red);"><i class="fa-solid fa-circle-play"></i></div>
+          Sessions live
+        </div>
+        <a href="{% url 'live_stream:create' %}" class="btn-ghost" style="font-size:.72rem;padding:5px 10px;"><i class="fa-solid fa-plus"></i></a>
+      </div>
+      <div class="d-flex flex-column gap-2">
+        {% for session in my_sessions %}
+        <div style="padding:14px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg-card);">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+            <div style="font-weight:600;font-size:.83rem;color:var(--text-primary);flex:1;">{{ session.title|truncatechars:35 }}</div>
+            {% if session.status == 'live' %}<span class="pill" style="background:rgba(239,68,68,.15);color:var(--red);font-size:.62rem;"><span class="live-dot" style="width:6px;height:6px;"></span> Live</span>
+            {% elif session.status == 'scheduled' %}<span class="pill pill-muted" style="font-size:.62rem;"><i class="fa-regular fa-clock"></i> Planifiée</span>
+            {% else %}<span class="pill pill-muted" style="font-size:.62rem;"><i class="fa-solid fa-check"></i> Terminée</span>{% endif %}
+          </div>
+          <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px;"><i class="fa-regular fa-calendar me-1"></i>{{ session.scheduled_at|date:"d M Y, H:i"|default:"—" }}</div>
+          {% if session.status == 'live' %}<a href="{{ session.get_join_url }}" class="btn-mint" style="font-size:.72rem;padding:5px 12px;"><i class="fa-solid fa-arrow-right-to-bracket"></i> Rejoindre</a>
+          {% else %}<a href="{% url 'live_stream:manage' session.uid %}" class="btn-ghost" style="font-size:.72rem;padding:5px 12px;"><i class="fa-solid fa-gear"></i> Gérer</a>{% endif %}
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:32px 16px;color:var(--text-muted);">
+          <i class="fa-solid fa-video" style="font-size:2rem;opacity:.2;display:block;margin-bottom:12px;"></i>
+          <p style="font-size:.8rem;margin-bottom:12px;">Aucune session planifiée</p>
+          <a href="{% url 'live_stream:create' %}" class="btn-primary-gradient" style="font-size:.75rem;padding:8px 16px;"><i class="fa-solid fa-plus"></i> Créer</a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="glass-card p-4 animate-in animate-in-d3">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--mint));display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:#fff;margin:0 auto 12px;border:3px solid var(--border-glow);box-shadow:var(--shadow-glow);">{{ request.user.first_name|first|default:request.user.username|first|upper }}</div>
+        <div style="font-family:var(--font-display);font-weight:700;font-size:1rem;color:var(--text-primary);">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div style="font-size:.75rem;color:var(--mint);font-weight:500;margin-top:2px;">Enseignant FLE</div>
+        {% if profile.institution %}<div style="font-size:.72rem;color:var(--text-muted);margin-top:4px;"><i class="fa-solid fa-building-columns me-1"></i>{{ profile.institution }}</div>{% endif %}
+      </div>
+      <div class="divider"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center;">
+        <div><div style="font-family:var(--font-display);font-size:1.3rem;font-weight:800;color:var(--violet-light);">{{ my_courses.count }}</div><div style="font-size:.7rem;color:var(--text-muted);">Cours</div></div>
+        <div><div style="font-family:var(--font-display);font-size:1.3rem;font-weight:800;color:var(--mint);">{{ total_students }}</div><div style="font-size:.7rem;color:var(--text-muted);">Élèves</div></div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:.78rem;">
+        <span style="color:var(--text-muted);">Formation IA</span>
+        {% if profile.ai_training_completed %}<span class="pill pill-mint"><i class="fa-solid fa-check"></i> Complétée</span>
+        {% else %}<a href="{% url 'ai_tools:training_hub' %}" class="pill pill-orange"><i class="fa-solid fa-play"></i> Commencer</a>{% endif %}
+      </div>
+      <a href="{% url 'accounts:profile' %}" class="btn-ghost w-100 mt-3 justify-content-center" style="font-size:.8rem;"><i class="fa-solid fa-pen-to-square"></i> Modifier le profil</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

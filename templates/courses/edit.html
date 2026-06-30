@@ -1,0 +1,96 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Modifier — {{ course.title }}{% endblock %}
+{% block breadcrumb %}Modifier le cours{% endblock %}
+{% block nav_courses %}active{% endblock %}
+{% block content %}
+<div class="page-header animate-in">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+    <div>
+      <div class="page-eyebrow"><i class="fa-solid fa-pen-to-square me-2"></i>Édition</div>
+      <h1 class="page-title">{{ course.title|truncatechars:40 }}</h1>
+      <p class="page-subtitle">Modifiez votre cours, gérez les leçons et les exercices.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ course.get_absolute_url }}" class="btn-ghost" target="_blank"><i class="fa-solid fa-eye"></i> Aperçu</a>
+      <a href="{% url 'courses:add_lesson' course.slug %}" class="btn-primary-gradient"><i class="fa-solid fa-plus"></i> Ajouter une leçon</a>
+    </div>
+  </div>
+</div>
+<div class="row g-4">
+  <!-- FORM -->
+  <div class="col-lg-7">
+    <div class="glass-card p-4 mb-4 animate-in">
+      <div class="section-title mb-4"><div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-gear"></i></div> Paramètres du cours</div>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-12"><label class="form-label-dark">Titre</label>{{ form.title }}</div>
+          <div class="col-md-6"><label class="form-label-dark">Slug</label>{{ form.slug }}</div>
+          <div class="col-md-3"><label class="form-label-dark">Niveau</label>{{ form.level }}</div>
+          <div class="col-md-3"><label class="form-label-dark">Catégorie</label>{{ form.category }}</div>
+          <div class="col-12"><label class="form-label-dark">Description</label>{{ form.description }}</div>
+          <div class="col-md-6"><label class="form-label-dark">Miniature</label>{{ form.thumbnail }}</div>
+          <div class="col-md-6"><label class="form-label-dark">Durée (heures)</label>{{ form.duration_hours }}</div>
+          <div class="col-12">
+            <div style="display:flex;align-items:center;gap:24px;padding:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.83rem;color:var(--text-secondary);">{{ form.is_published }}<span>Publié</span></label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.83rem;color:var(--text-secondary);">{{ form.is_free }}<span>Gratuit</span></label>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-3 mt-4">
+          <button type="submit" class="btn-primary-gradient"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder</button>
+          <a href="{% url 'accounts:dashboard' %}" class="btn-ghost"><i class="fa-solid fa-xmark"></i> Annuler</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- LESSONS MANAGER -->
+  <div class="col-lg-5">
+    <div class="glass-card p-4 animate-in animate-in-d1">
+      <div class="section-header">
+        <div class="section-title"><div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-list-ol"></i></div> Leçons ({{ lessons.count }})</div>
+        <a href="{% url 'courses:add_lesson' course.slug %}" class="btn-ghost" style="font-size:.75rem;padding:6px 12px;"><i class="fa-solid fa-plus"></i></a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;max-height:450px;overflow-y:auto;">
+        {% for lesson in lessons %}
+        <div style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);transition:all var(--transition);" onmouseenter="this.style.borderColor='var(--border-glow)'" onmouseleave="this.style.borderColor='var(--border)'">
+          <div style="width:26px;height:26px;border-radius:7px;background:var(--violet-dim);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--violet-light);flex-shrink:0;">{{ lesson.order }}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:.82rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ lesson.title }}</div>
+            <div style="font-size:.7rem;color:var(--text-muted);display:flex;gap:8px;">
+              <span><i class="fa-solid fa-{% if lesson.lesson_type == 'video' %}play{% else %}pencil{% endif %} me-1"></i>{{ lesson.get_lesson_type_display }}</span>
+              {% if lesson.duration_minutes %}<span><i class="fa-regular fa-clock me-1"></i>{{ lesson.duration_minutes }}min</span>{% endif %}
+            </div>
+          </div>
+          <a href="{% url 'courses:lesson' course.slug lesson.id %}" class="topbar-btn" style="width:28px;height:28px;font-size:.72rem;" title="Voir"><i class="fa-solid fa-eye"></i></a>
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:32px;color:var(--text-muted);">
+          <i class="fa-solid fa-list" style="font-size:2rem;opacity:.15;display:block;margin-bottom:12px;"></i>
+          <p style="font-size:.82rem;margin-bottom:12px;">Aucune leçon encore.</p>
+          <a href="{% url 'courses:add_lesson' course.slug %}" class="btn-primary-gradient" style="font-size:.78rem;padding:8px 16px;"><i class="fa-solid fa-plus"></i> Ajouter</a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <!-- AI TOOLS PANEL -->
+    <div class="glass-card p-4 mt-4 animate-in animate-in-d2" style="background:linear-gradient(135deg,rgba(108,62,255,.06),rgba(0,212,170,.04));border:1px solid var(--border-glow);">
+      <div class="section-title mb-3"><div class="section-title-icon" style="background:var(--violet-dim);color:var(--violet-light);"><i class="fa-solid fa-robot"></i></div> Enrichir avec l'IA</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="{% url 'ai_tools:exercise_generator' %}" class="btn-ghost" style="font-size:.8rem;padding:10px 14px;"><i class="fa-solid fa-bolt" style="color:var(--violet-light);"></i> Générer des exercices</a>
+        <a href="{% url 'ai_tools:grammar_corrector' %}" class="btn-ghost" style="font-size:.8rem;padding:10px 14px;"><i class="fa-solid fa-spell-check" style="color:var(--mint);"></i> Corriger du texte</a>
+        <a href="{% url 'ai_tools:templates_lab' %}" class="btn-ghost" style="font-size:.8rem;padding:10px 14px;"><i class="fa-solid fa-layer-group" style="color:var(--orange);"></i> Modèles pédagogiques</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<style>
+input,textarea,select{background:var(--bg-card)!important;border:1px solid var(--border)!important;color:var(--text-primary)!important;border-radius:10px!important;padding:10px 14px!important;font-family:var(--font-body)!important;font-size:.85rem!important;width:100%!important;transition:border-color var(--transition)!important;}
+input:focus,textarea:focus,select:focus{border-color:var(--violet)!important;box-shadow:0 0 0 3px rgba(108,62,255,.15)!important;outline:none!important;}
+input[type="checkbox"]{width:18px!important;height:18px!important;accent-color:var(--violet);}
+input[type="file"]{padding:8px!important;}
+</style>
+{% endblock %}

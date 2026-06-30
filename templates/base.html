@@ -1,0 +1,173 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Assistant IA — École FLE{% endblock %}
+{% block breadcrumb %}Assistant FLE{% endblock %}
+
+{% block content %}
+<div class="row g-0" style="height: calc(100vh - 180px);">
+
+  <!-- SESSION SIDEBAR -->
+  <div class="col-md-3 border-end" style="background:var(--bg-card);border-color:var(--border) !important;border-radius:var(--radius-md) 0 0 var(--radius-md);">
+    <div class="p-3 border-bottom" style="border-color:var(--border) !important;display:flex;justify-content:space-between;align-items:center;">
+      <h6 class="mb-0 fw-bold" style="color:var(--text-primary);"><i class="fa-regular fa-comment-dots me-2" style="color:var(--violet);"></i>Mes conversations</h6>
+      <button class="btn btn-sm" id="newSessionBtn" style="background:var(--violet);color:#fff;border:none;border-radius:8px;padding:4px 12px;">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+    <div class="overflow-auto flex-grow-1" style="max-height:400px;">
+      {% for sess in sessions %}
+      <a href="{% url 'ai_tools:chatbot_session' sess.pk %}"
+         class="d-block p-3 border-bottom text-decoration-none" style="border-color:var(--border) !important;{% if current_session.pk == sess.pk %}background:var(--violet-dim);{% endif %}">
+        <div class="text-truncate small fw-semibold" style="color:var(--text-primary);">{{ sess.title|truncatechars:35 }}</div>
+        <div style="color:var(--text-muted);font-size:.7rem;">
+          <i class="fa-regular fa-comment me-1"></i>{{ sess.total_messages }} messages ·
+          {{ sess.updated_at|timesince }}
+        </div>
+      </a>
+      {% empty %}
+      <div class="text-center p-4 small" style="color:var(--text-muted);">
+        <i class="fa-regular fa-comment-dots" style="font-size:2rem;display:block;margin-bottom:12px;opacity:.25;"></i>
+        Aucune conversation.<br>Commencez par poser une question !
+      </div>
+      {% endfor %}
+    </div>
+    <!-- Quick tips -->
+    <div class="p-3 border-top" style="border-color:var(--border) !important;background:var(--bg-surface);border-radius:0 0 0 var(--radius-md);">
+      <p class="small mb-2 fw-semibold" style="color:var(--text-muted);">💡 Idées de questions :</p>
+      <div class="d-flex flex-column gap-1">
+        <button class="btn btn-outline-secondary btn-sm text-start text-truncate quick-tip" style="font-size:.75rem;border-color:var(--border);color:var(--text-secondary);">
+          <i class="fa-regular fa-circle-question me-1"></i> Explique-moi le subjonctif
+        </button>
+        <button class="btn btn-outline-secondary btn-sm text-start text-truncate quick-tip" style="font-size:.75rem;border-color:var(--border);color:var(--text-secondary);">
+          <i class="fa-regular fa-circle-question me-1"></i> Comment conjuguer 'être' ?
+        </button>
+        <button class="btn btn-outline-secondary btn-sm text-start text-truncate quick-tip" style="font-size:.75rem;border-color:var(--border);color:var(--text-secondary);">
+          <i class="fa-regular fa-circle-question me-1"></i> Différence entre 'a' et 'à' ?
+        </button>
+        <button class="btn btn-outline-secondary btn-sm text-start text-truncate quick-tip" style="font-size:.75rem;border-color:var(--border);color:var(--text-secondary);">
+          <i class="fa-regular fa-circle-question me-1"></i> Corrige ma phrase
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="col-md-9 d-flex flex-column" style="background:var(--bg-surface);border-radius:0 var(--radius-md) var(--radius-md) 0;">
+
+    <!-- Header -->
+    <div class="px-4 py-3 border-bottom" style="border-color:var(--border) !important;display:flex;align-items:center;justify-content:space-between;">
+      <div class="d-flex align-items-center gap-3">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--mint));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <div>
+          <div class="fw-semibold" style="color:var(--text-primary);">Assistant FLE</div>
+          <small style="color:var(--mint);"><i class="fa-solid fa-circle" style="font-size:.5rem;"></i> En ligne — Niveau {{ request.user.level|default:"A1" }}</small>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <span class="badge" style="background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);padding:6px 12px;">
+          <i class="fa-solid fa-microchip me-1" style="color:var(--violet);"></i>GPT-4o mini
+        </span>
+        {% if current_session %}
+        <span class="badge" style="background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);padding:6px 12px;">
+          <i class="fa-solid fa-bolt me-1" style="color:var(--orange);"></i>{{ current_session.tokens_used }} tokens
+        </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div id="chatbotMessages" class="flex-grow-1 overflow-auto p-4 d-flex flex-column gap-3" style="max-height:500px;">
+
+      {% if not messages_list %}
+      <!-- Welcome message -->
+      <div class="p-3" style="max-width:80%;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--text-primary);">
+          <i class="fa-regular fa-hand-peace me-2"></i> Bonjour {{ request.user.first_name|default:request.user.username }} !
+        </div>
+        <div style="color:var(--text-secondary);margin-top:8px;font-size:.9rem;">
+          Je suis votre assistant personnel pour apprendre le français.
+          Je peux vous aider avec :
+          <ul style="margin-top:8px;margin-bottom:0;padding-left:20px;">
+            <li style="color:var(--text-secondary);">📝 La grammaire et la conjugaison</li>
+            <li style="color:var(--text-secondary);">📚 Le vocabulaire et les expressions</li>
+            <li style="color:var(--text-secondary);">✍️ La correction de vos textes</li>
+            <li style="color:var(--text-secondary);">🗣️ La prononciation et les règles</li>
+          </ul>
+        </div>
+        <div style="color:var(--text-muted);font-size:.8rem;margin-top:8px;">Posez votre première question !</div>
+      </div>
+      {% else %}
+      {% for msg in messages_list %}
+        {% if msg.role != 'system' %}
+        <div class="p-3" style="max-width:80%;{% if msg.role == 'user' %}align-self:flex-end;background:var(--violet);border-radius:var(--radius-md) var(--radius-md) 0 var(--radius-md);color:#fff;{% else %}background:var(--bg-card);border-radius:var(--radius-md) var(--radius-md) var(--radius-md) 0;border:1px solid var(--border);color:var(--text-secondary);{% endif %}">
+          {{ msg.content|linebreaks }}
+        </div>
+        {% endif %}
+      {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- Input -->
+    <div class="p-3 border-top" style="border-color:var(--border) !important;background:var(--bg-card);border-radius:0 0 var(--radius-md) 0;">
+      <form id="chatbotForm" data-session-id="{{ current_session.pk|default:'' }}">
+        {% csrf_token %}
+        <div class="input-group">
+          <textarea
+            id="chatbotInput"
+            class="form-control border-0 shadow-none"
+            placeholder="Posez votre question en français (ou en arabe)…"
+            rows="2"
+            style="resize:none;border-radius:12px 0 0 12px !important;background:var(--bg-surface);color:var(--text-primary);font-size:.9rem;"
+            maxlength="2000"></textarea>
+          <button type="submit" class="btn px-4" style="background:linear-gradient(135deg,var(--violet),var(--violet-light));color:#fff;border:none;border-radius:0 12px 12px 0 !important;">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <small style="color:var(--text-muted);">
+            <kbd style="background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:.7rem;">Enter</kbd> pour envoyer ·
+            <kbd style="background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:.7rem;">Shift+Enter</kbd> nouvelle ligne
+          </small>
+          <small style="color:var(--text-muted);" id="charCount">0 / 2000</small>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Quick tip buttons
+document.querySelectorAll('.quick-tip').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.getElementById('chatbotInput').value = this.textContent.trim();
+    document.getElementById('chatbotForm').dispatchEvent(new Event('submit'));
+  });
+});
+
+// New session
+document.getElementById('newSessionBtn')?.addEventListener('click', async function() {
+  const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const res = await fetch('/ai/chatbot/new/', { 
+    method: 'POST', 
+    headers: { 'X-CSRFToken': csrf,
+               'Content-Type': 'application/json' } 
+  });
+  const data = await res.json();
+  window.location.href = '/ai/chatbot/' + data.session_id + '/';
+});
+
+// Char counter
+document.getElementById('chatbotInput')?.addEventListener('input', function() {
+  document.getElementById('charCount').textContent = this.value.length + ' / 2000';
+});
+
+// Scroll to bottom on load
+const msgs = document.getElementById('chatbotMessages');
+if (msgs) msgs.scrollTop = msgs.scrollHeight;
+</script>
+{% endblock %}

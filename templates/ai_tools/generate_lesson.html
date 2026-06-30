@@ -1,0 +1,105 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Générateur de leçons — École FLE{% endblock %}
+{% block breadcrumb %}Générateur de leçons{% endblock %}
+
+{% block content %}
+
+<div class="page-header animate-in">
+    <div class="page-eyebrow"><i class="fa-solid fa-book me-2" style="color:var(--violet);"></i>IA avancée</div>
+    <h1 class="page-title">📚 Générateur de leçons numériques</h1>
+    <p class="page-subtitle">Créez des leçons interactives avec l'intelligence artificielle.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7 animate-in animate-in-d1">
+        <div class="glass-card p-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label-dark">Thème de la leçon</label>
+                    <input type="text" name="topic" class="form-control-dark" placeholder="Ex: Le subjonctif présent" style="width:100%;" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Niveau</label>
+                    <select name="level" class="form-select-dark" style="width:100%;">
+                        <option value="A1">A1 - Débutant</option>
+                        <option value="A2" selected>A2 - Élémentaire</option>
+                        <option value="B1">B1 - Intermédiaire</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Type de leçon</label>
+                    <select name="lesson_type" class="form-select-dark" style="width:100%;">
+                        <option value="video">Vidéo</option>
+                        <option value="text">Texte</option>
+                        <option value="interactive">Interactive</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Durée estimée (minutes)</label>
+                    <input type="number" name="duration" class="form-control-dark" value="30" min="5" max="120" style="width:100%;">
+                </div>
+                <button type="submit" class="btn-primary-gradient w-100">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Générer la leçon
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-5 animate-in animate-in-d2">
+        <div class="glass-card p-4">
+            <div class="section-title mb-3">
+                <div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);"><i class="fa-solid fa-lightbulb"></i></div>
+                Exemples de leçons
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);">
+                    <div style="font-weight:600;color:var(--text-primary);">Le subjonctif présent</div>
+                    <div style="font-size:.75rem;color:var(--text-muted);">A2 · 30 min · Interactif</div>
+                </div>
+                <div style="padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);">
+                    <div style="font-weight:600;color:var(--text-primary);">Les verbes du 1er groupe</div>
+                    <div style="font-size:.75rem;color:var(--text-muted);">A1 · 20 min · Vidéo</div>
+                </div>
+                <div style="padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);">
+                    <div style="font-weight:600;color:var(--text-primary);">Le passé composé</div>
+                    <div style="font-size:.75rem;color:var(--text-muted);">A2 · 45 min · Texte</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Résultat de la leçon générée -->
+{% if generated_lesson %}
+<div class="row mt-4 animate-in animate-in-d3">
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-title-icon" style="background:var(--mint-dim);color:var(--mint);">
+                        <i class="fa-regular fa-file-lines"></i>
+                    </div>
+                    📖 Leçon générée : {{ generated_lesson.title }}
+                </div>
+                <span class="pill pill-mint">{{ generated_lesson.level }} · {{ generated_lesson.duration }} min</span>
+            </div>
+            <div style="color:var(--text-secondary);line-height:1.8;background:var(--bg-card);padding:20px;border-radius:var(--radius-md);border:1px solid var(--border);">
+                {{ generated_lesson.content|safe }}
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn-ghost" style="font-size:.82rem;padding:8px 16px;" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> Imprimer
+                </button>
+                <button class="btn-ghost" style="font-size:.82rem;padding:8px 16px;" onclick="navigator.clipboard.writeText(document.querySelector('.glass-card .p-20')?.innerText || '')">
+                    <i class="fa-regular fa-copy"></i> Copier
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

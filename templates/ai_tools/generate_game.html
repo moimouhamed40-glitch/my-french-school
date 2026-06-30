@@ -1,0 +1,111 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Générateur de jeux — École FLE{% endblock %}
+{% block breadcrumb %}Générateur de jeux{% endblock %}
+
+{% block content %}
+
+<div class="page-header animate-in">
+    <div class="page-eyebrow"><i class="fa-solid fa-gamepad me-2" style="color:var(--orange);"></i>IA avancée</div>
+    <h1 class="page-title">🎮 Générateur de jeux éducatifs</h1>
+    <p class="page-subtitle">Créez des jeux interactifs pour vos élèves.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7 animate-in animate-in-d1">
+        <div class="glass-card p-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label-dark">Thème du jeu</label>
+                    <input type="text" name="theme" class="form-control-dark" placeholder="Ex: Vocabulaire de la maison" style="width:100%;" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Niveau</label>
+                    <select name="level" class="form-select-dark" style="width:100%;">
+                        <option value="A1">A1 - Débutant</option>
+                        <option value="A2" selected>A2 - Élémentaire</option>
+                        <option value="B1">B1 - Intermédiaire</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Type de jeu</label>
+                    <select name="game_type" class="form-select-dark" style="width:100%;">
+                        <option value="quiz">Quiz</option>
+                        <option value="crossword">Mots croisés</option>
+                        <option value="matching">Association</option>
+                        <option value="hangman">Pendu</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Nombre de questions</label>
+                    <select name="count" class="form-select-dark" style="width:100%;">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="15">15</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary-gradient w-100">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Générer le jeu
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-5 animate-in animate-in-d2">
+        <div class="glass-card p-4">
+            <div class="section-title mb-3">
+                <div class="section-title-icon" style="background:var(--orange-dim);color:var(--orange);"><i class="fa-solid fa-lightbulb"></i></div>
+                Types de jeux
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);display:flex;align-items:center;gap:12px;">
+                    <span style="font-size:1.5rem;">🧩</span>
+                    <div>
+                        <div style="font-weight:600;color:var(--text-primary);">Quiz</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Questions à choix multiples</div>
+                    </div>
+                </div>
+                <div style="padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);display:flex;align-items:center;gap:12px;">
+                    <span style="font-size:1.5rem;">🔤</span>
+                    <div>
+                        <div style="font-weight:600;color:var(--text-primary);">Mots croisés</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Grille interactive</div>
+                    </div>
+                </div>
+                <div style="padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);display:flex;align-items:center;gap:12px;">
+                    <span style="font-size:1.5rem;">🔗</span>
+                    <div>
+                        <div style="font-weight:600;color:var(--text-primary);">Association</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Relier mots et images</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Résultat du jeu généré -->
+{% if generated_game %}
+<div class="row mt-4 animate-in animate-in-d3">
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-title-icon" style="background:var(--orange-dim);color:var(--orange);">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    🎮 Jeu généré : {{ generated_game.theme }}
+                </div>
+                <span class="pill pill-orange">{{ generated_game.level }} · {{ generated_game.count }} questions</span>
+            </div>
+            <div style="color:var(--text-secondary);line-height:1.8;background:var(--bg-card);padding:20px;border-radius:var(--radius-md);border:1px solid var(--border);">
+                {{ generated_game.content|safe }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

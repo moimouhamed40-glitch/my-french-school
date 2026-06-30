@@ -1,0 +1,38 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Outils IA{% endblock %}
+{% block breadcrumb %}Outils IA{% endblock %}
+{% block content %}
+<div class="page-header animate-in">
+    <h1 class="page-title">🤖 Outils d'Intelligence Artificielle</h1>
+    <p class="page-subtitle">Des outils pour améliorer votre enseignement du français.</p>
+</div>
+<div class="row g-4">
+    <div class="col-md-4">
+        <a href="{% url 'ai_tools:chatbot' %}" class="text-decoration-none">
+            <div class="glass-card p-4 text-center">
+                <div style="font-size:3rem;">💬</div>
+                <h5>Assistant FLE</h5>
+                <p class="text-muted small">Posez vos questions sur le français</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'ai_tools:exercise_generator' %}" class="text-decoration-none">
+            <div class="glass-card p-4 text-center">
+                <div style="font-size:3rem;">📝</div>
+                <h5>Générateur d'exercices</h5>
+                <p class="text-muted small">Créez des exercices en 10 secondes</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'ai_tools:grammar_corrector' %}" class="text-decoration-none">
+            <div class="glass-card p-4 text-center">
+                <div style="font-size:3rem;">✅</div>
+                <h5>Correcteur grammatical</h5>
+                <p class="text-muted small">Corrigez les fautes automatiquement</p>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

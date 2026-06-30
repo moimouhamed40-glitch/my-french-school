@@ -1,0 +1,82 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Sessions Live{% endblock %}
+{% block breadcrumb %}Sessions Live{% endblock %}
+{% block nav_live %}active{% endblock %}
+{% block content %}
+<div class="page-header animate-in">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+    <div>
+      <div class="page-eyebrow"><i class="fa-solid fa-circle-play me-2"></i>Classes virtuelles</div>
+      <h1 class="page-title">Sessions Live <span class="live-dot" style="width:10px;height:10px;margin-left:8px;"></span></h1>
+      <p class="page-subtitle">Rejoignez ou créez une classe virtuelle en temps réel.</p>
+    </div>
+    {% if request.user.is_teacher or request.user.is_platform_admin %}
+    <a href="{% url 'live_stream:create' %}" class="btn-primary-gradient"><i class="fa-solid fa-plus"></i> Créer une session</a>
+    {% endif %}
+  </div>
+</div>
+<!-- LIVE NOW -->
+{% with live_sessions=sessions|dictsort:"status" %}
+{% for session in sessions %}
+{% if session.status == 'live' %}
+{% if forloop.first %}
+<div class="mb-4 animate-in">
+  <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:12px;display:flex;align-items:center;gap:8px;"><span class="live-dot"></span> EN DIRECT MAINTENANT</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">
+{% endif %}
+<div style="background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(239,68,68,.03));border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-lg);padding:24px;animation:pulseGlow 2s infinite;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+    <span class="pill" style="background:rgba(239,68,68,.2);color:var(--red);font-size:.65rem;"><span class="live-dot" style="width:6px;height:6px;"></span> Live</span>
+    <span style="font-size:.75rem;color:var(--text-muted);"><i class="fa-solid fa-users me-1"></i>{{ session.participant_count }}/{{ session.max_participants }}</span>
+  </div>
+  <div style="font-family:var(--font-display);font-weight:800;font-size:1.05rem;color:var(--text-primary);margin-bottom:8px;">{{ session.title }}</div>
+  <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:16px;"><i class="fa-solid fa-chalkboard-user me-1" style="color:var(--violet-light);"></i>{{ session.host.get_full_name|default:session.host.username }}</div>
+  <a href="{{ session.get_join_url }}" class="btn-primary-gradient w-100 justify-content-center" style="background:linear-gradient(135deg,var(--red),#ff6b6b);box-shadow:0 6px 20px rgba(239,68,68,.4);">
+    <i class="fa-solid fa-arrow-right-to-bracket"></i> Rejoindre maintenant
+  </a>
+</div>
+{% if forloop.last %}</div></div>{% endif %}
+{% endif %}
+{% endfor %}
+{% endwith %}
+<!-- ALL SESSIONS -->
+<div class="row g-4">
+  {% for session in sessions %}
+  {% if session.status != 'live' %}
+  <div class="col-md-6 col-xl-4 animate-in" style="animation-delay:{{ forloop.counter0 }}50ms;">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;height:100%;display:flex;flex-direction:column;transition:all var(--transition);" onmouseenter="this.style.borderColor='var(--border-glow)';this.style.transform='translateY(-3px)'" onmouseleave="this.style.borderColor='var(--border)';this.style.transform='none'">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <span class="pill {% if session.status == 'scheduled' %}pill-violet{% else %}pill-muted{% endif %}" style="font-size:.65rem;">
+          <i class="fa-{% if session.status == 'scheduled' %}regular fa-clock{% else %}solid fa-check{% endif %}"></i>
+          {{ session.get_status_display }}
+        </span>
+        <span style="font-size:.72rem;color:var(--text-muted);"><i class="fa-solid fa-users me-1"></i>max {{ session.max_participants }}</span>
+      </div>
+      <div style="font-family:var(--font-display);font-weight:700;font-size:.97rem;color:var(--text-primary);margin-bottom:8px;line-height:1.3;flex:1;">{{ session.title }}</div>
+      {% if session.description %}<p style="font-size:.78rem;color:var(--text-muted);margin-bottom:12px;line-height:1.5;">{{ session.description|truncatewords:15 }}</p>{% endif %}
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:.75rem;color:var(--text-muted);margin-bottom:16px;">
+        <span><i class="fa-solid fa-chalkboard-user me-1" style="color:var(--violet-light);"></i>{{ session.host.get_full_name|default:session.host.username }}</span>
+        {% if session.scheduled_at %}<span><i class="fa-regular fa-calendar me-1" style="color:var(--mint);"></i>{{ session.scheduled_at|date:"d M Y à H:i" }}</span>{% endif %}
+        {% if session.course %}<span><i class="fa-solid fa-book-open me-1" style="color:var(--orange);"></i>{{ session.course.title|truncatechars:25 }}</span>{% endif %}
+      </div>
+      <div class="d-flex gap-2">
+        {% if session.status == 'scheduled' %}
+        <a href="{{ session.get_join_url }}" class="btn-mint" style="flex:1;justify-content:center;font-size:.8rem;padding:9px;"><i class="fa-solid fa-arrow-right-to-bracket"></i> Rejoindre</a>
+        {% elif session.recording %}
+        <a href="{{ session.recording.file.url }}" class="btn-ghost" style="flex:1;justify-content:center;font-size:.8rem;padding:9px;" target="_blank"><i class="fa-solid fa-play"></i> Voir l'enregistrement</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% empty %}
+  <div class="col-12 animate-in">
+    <div class="glass-card p-5 text-center">
+      <i class="fa-solid fa-video-slash" style="font-size:3.5rem;opacity:.1;display:block;margin-bottom:16px;"></i>
+      <h5 style="color:var(--text-secondary);">Aucune session planifiée pour le moment.</h5>
+      {% if request.user.is_teacher %}<a href="{% url 'live_stream:create' %}" class="btn-primary-gradient mt-3"><i class="fa-solid fa-plus"></i> Créer la première session</a>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+msgid "Dashboard"
+msgstr "لوحة التحكم"
+
+msgid "Login"
+msgstr "تسجيل الدخول"
+
+msgid "Logout"
+msgstr "تسجيل الخروج"
+
+msgid "Register"
+msgstr "إنشاء حساب"
+
+msgid "Profile"
+msgstr "الملف الشخصي"
+
+msgid "Courses"
+msgstr "الدورات"
+
+msgid "Library"
+msgstr "المكتبة"
+
+msgid "Live Sessions"
+msgstr "الجلسات المباشرة"
+
+msgid "Forum"
+msgstr "المنتدى"
+
+msgid "Notifications"
+msgstr "الإشعارات"
+
+msgid "Home"
+msgstr "الرئيسية"
+
+msgid "Welcome"
+msgstr "مرحباً بك"
+
+msgid "Search"
+msgstr "بحث"
+
+msgid "Submit"
+msgstr "إرسال"
+
+msgid "Cancel"
+msgstr "إلغاء"
+
+msgid "Save"
+msgstr "حفظ"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Edit"
+msgstr "تعديل"
+
+msgid "Create"
+msgstr "إنشاء"

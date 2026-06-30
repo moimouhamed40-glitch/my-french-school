@@ -1,0 +1,68 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Gestion des utilisateurs{% endblock %}
+{% block breadcrumb %}Utilisateurs{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block content %}
+<div class="page-header animate-in">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+    <div>
+      <div class="page-eyebrow"><i class="fa-solid fa-users me-2"></i>Administration</div>
+      <h1 class="page-title">Gestion des utilisateurs</h1>
+      <p class="page-subtitle">{{ users.count }} utilisateur{{ users.count|pluralize }} enregistré{{ users.count|pluralize }}</p>
+    </div>
+  </div>
+</div>
+<!-- FILTER BAR -->
+<div class="glass-card p-3 mb-4 animate-in">
+  <form method="get" class="d-flex align-items-center gap-3 flex-wrap">
+    <div style="position:relative;flex:1;min-width:200px;">
+      <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.8rem;"></i>
+      <input name="q" value="{{ request.GET.q }}" placeholder="Rechercher par nom ou email…" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);border-radius:10px;padding:8px 14px 8px 36px;font-size:.83rem;width:100%;">
+    </div>
+    <select name="role" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);border-radius:10px;padding:8px 14px;font-size:.83rem;min-width:140px;">
+      <option value="">Tous les rôles</option>
+      {% for val, label in role_choices %}
+      <option value="{{ val }}" {% if current_filter == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-primary-gradient" style="padding:9px 20px;font-size:.83rem;"><i class="fa-solid fa-filter"></i> Filtrer</button>
+    {% if current_filter or request.GET.q %}<a href="{% url 'accounts:user_list' %}" class="btn-ghost" style="padding:9px 16px;font-size:.83rem;"><i class="fa-solid fa-xmark"></i> Réinitialiser</a>{% endif %}
+  </form>
+</div>
+<!-- TABLE -->
+<div class="glass-card animate-in animate-in-d1">
+  <div style="overflow-x:auto;">
+    <table class="premium-table">
+      <thead>
+        <tr><th>Utilisateur</th><th>Rôle</th><th>Niveau</th><th>Inscription</th><th>Statut</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--mint));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0;">{{ user.first_name|first|default:user.username|first|upper }}</div>
+              <div>
+                <div style="font-weight:600;font-size:.85rem;color:var(--text-primary);">{{ user.get_full_name|default:user.username }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);">{{ user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="pill {% if user.role == 'teacher' %}pill-mint{% elif user.role == 'admin' %}pill-orange{% else %}pill-violet{% endif %}">{{ user.get_role_display }}</span></td>
+          <td><span style="font-size:.82rem;color:var(--text-secondary);">{{ user.level|default:"—" }}</span></td>
+          <td><span style="font-size:.75rem;color:var(--text-muted);">{{ user.date_joined|date:"d M Y" }}</span></td>
+          <td>{% if user.is_active %}<span class="pill pill-mint" style="font-size:.65rem;"><i class="fa-solid fa-circle" style="font-size:.4rem;"></i> Actif</span>{% else %}<span class="pill pill-muted" style="font-size:.65rem;">Inactif</span>{% endif %}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'admin:accounts_user_change' user.pk %}" class="topbar-btn" title="Modifier" style="width:30px;height:30px;font-size:.75rem;"><i class="fa-solid fa-pen-to-square"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;padding:48px;color:var(--text-muted);"><i class="fa-solid fa-users-slash" style="display:block;font-size:2rem;opacity:.2;margin-bottom:12px;"></i>Aucun utilisateur trouvé</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
