@@ -9,7 +9,6 @@ def home_page(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('rosetta/', include('rosetta.urls')),  # ✅ أضف هذا السطر
     path('', home_page, name='home'),
     path('accounts/', include('apps.accounts.urls', namespace='accounts')),
     path('courses/', include('apps.courses.urls', namespace='courses')),
