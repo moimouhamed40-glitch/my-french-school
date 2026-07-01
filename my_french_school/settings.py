@@ -33,7 +33,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'crispy_forms',
     'crispy_bootstrap5',
-    'rosetta',
+    # 'rosetta',  # ❌ تم حذفها
 ]
 
 LOCAL_APPS = [
