@@ -84,12 +84,12 @@ WSGI_APPLICATION = 'my_french_school.wsgi.application'
 ASGI_APPLICATION = 'my_french_school.asgi.application'
 
 # ─── DATABASE ─────────────────────────────────────────────────────────────────
+# ─── DATABASE ─────────────────────────────────────────────────────────────────
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 # ─── CHANNELS (WebSocket) ─────────────────────────────────────────────────────
