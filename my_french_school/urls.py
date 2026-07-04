@@ -3,14 +3,14 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import render
-from django.contrib.auth import views as auth_views  # ✅ أضف هذا السطر
+from django.contrib.auth import views as auth_views
 
 def home_page(request):
     return render(request, 'home.html')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('rosetta/', include('rosetta.urls')),  # ✅ أضف هذا السطر
+    # path('rosetta/', include('rosetta.urls')),  # ❌ تم حذفه مؤقتاً
     path('', home_page, name='home'),
     path('accounts/', include('apps.accounts.urls', namespace='accounts')),
     path('courses/', include('apps.courses.urls', namespace='courses')),
