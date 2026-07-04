@@ -36,6 +36,9 @@ input::placeholder{color:var(--muted);}
 .register-link a{color:var(--mint);text-decoration:none;font-weight:600;}
 .error-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 14px;font-size:.8rem;color:#EF4444;margin-bottom:16px;}
 .mb-4{margin-bottom:16px;}
+.forgot-link{text-align:center;font-size:.82rem;color:var(--muted);margin-top:16px;}
+.forgot-link a{color:var(--text);text-decoration:none;font-weight:500;transition:color .2s;}
+.forgot-link a:hover{color:var(--violet);}
 </style>
 </head>
 <body>
@@ -63,6 +66,9 @@ input::placeholder{color:var(--muted);}
     </div>
     <button type="submit" class="btn-submit"><i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Se connecter</button>
   </form>
+  <div class="forgot-link">
+    <a href="{% url 'password_reset' %}">Mot de passe oublié ?</a>
+  </div>
   <div class="divider">ou</div>
   <p class="register-link">Pas encore de compte ? <a href="{% url 'accounts:register' %}">S'inscrire gratuitement →</a></p>
 </div>

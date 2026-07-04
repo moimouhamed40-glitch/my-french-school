@@ -84,7 +84,6 @@ WSGI_APPLICATION = 'my_french_school.wsgi.application'
 ASGI_APPLICATION = 'my_french_school.asgi.application'
 
 # ─── DATABASE ─────────────────────────────────────────────────────────────────
-# ─── DATABASE ─────────────────────────────────────────────────────────────────
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -176,13 +175,16 @@ GROQ_API_KEY = config('GROQ_API_KEY', default='')
 AGORA_APP_ID = config('AGORA_APP_ID', default='')
 AGORA_APP_CERTIFICATE = config('AGORA_APP_CERTIFICATE', default='')
 
-# ─── EMAIL ────────────────────────────────────────────────────────────────────
+# ─── EMAIL CONFIGURATION ──────────────────────────────────────────────────────
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+
+# ─── PASSWORD RESET ──────────────────────────────────────────────────────────
+PASSWORD_RESET_TIMEOUT = 86400  # 24 hours
 
 # ─── SECURITY HEADERS (production) ───────────────────────────────────────────
 if not DEBUG:
