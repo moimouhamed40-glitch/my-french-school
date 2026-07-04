@@ -1,38 +1,869 @@
-{% extends 'base_dashboard.html' %}
+```html
 {% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>École FLE — Apprenez le français avec l'IA</title>
 
-{% block title %}École FLE — Apprenez le français en ligne{% endblock %}
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-{% block content %}
-<!-- Hero -->
-<section class="py-5 text-center">
-    <div class="container">
-        <h1 class="display-4 fw-bold">Bienvenue sur <span style="color: var(--mint);">École FLE</span></h1>
-        <p class="lead">Apprenez le français avec l'intelligence artificielle</p>
-        <div class="mt-4">
-            <a href="{% url 'accounts:register' %}" class="btn btn-primary-gradient">Commencer gratuitement</a>
-            <a href="{% url 'courses:list' %}" class="btn btn-ghost">Explorer les cours</a>
-        </div>
-        <div class="row mt-5 g-4">
-            <div class="col-md-4">
-                <div class="glass-card">
-                    <h3>{{ stats.total_students }}+</h3>
-                    <p class="text-muted">Élèves inscrits</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="glass-card">
-                    <h3>{{ stats.total_courses }}+</h3>
-                    <p class="text-muted">Cours disponibles</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="glass-card">
-                    <h3>{{ stats.total_teachers }}+</h3>
-                    <p class="text-muted">Enseignants experts</p>
-                </div>
-            </div>
-        </div>
+    <style>
+        /* ─── RESET & BASE ─── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0A0F1E;
+            color: #F8FAFF;
+            overflow-x: hidden;
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0F1E;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6C3EFF;
+            border-radius: 10px;
+        }
+
+        /* ─── GLASS CARD ─── */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(108, 62, 255, 0.3);
+            box-shadow: 0 0 30px rgba(108, 62, 255, 0.15);
+        }
+
+        /* ─── ANIMATED BACKGROUND ─── */
+        .hero-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: linear-gradient(135deg, #0A0F1E 0%, #1A2035 50%, #0A0F1E 100%);
+            overflow: hidden;
+        }
+
+        .hero-bg .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.25;
+            animation: float 20s infinite ease-in-out;
+        }
+        .hero-bg .orb:nth-child(1) {
+            width: 500px;
+            height: 500px;
+            background: #6C3EFF;
+            top: -15%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+        .hero-bg .orb:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: #00D4AA;
+            bottom: -15%;
+            right: -10%;
+            animation-delay: -6s;
+        }
+        .hero-bg .orb:nth-child(3) {
+            width: 300px;
+            height: 300px;
+            background: #FF6B35;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -12s;
+        }
+
+        @keyframes float {
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(60px, -40px) scale(1.1);
+            }
+            50% {
+                transform: translate(-30px, 50px) scale(0.9);
+            }
+            75% {
+                transform: translate(40px, -30px) scale(1.05);
+            }
+        }
+
+        /* ─── PARTICLES ─── */
+        .particles {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            animation: particleFloat 18s infinite linear;
+        }
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(108, 62, 255, 0.15);
+            border: 1px solid rgba(108, 62, 255, 0.2);
+            padding: 8px 24px;
+            border-radius: 50px;
+            color: #8B5CF6;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 25px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #6C3EFF, #00D4AA, #FF6B35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 300% 300%;
+            animation: gradientShift 10s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.65);
+            max-width: 600px;
+            margin: 0 auto 35px;
+            line-height: 1.8;
+        }
+
+        .hero-buttons .btn {
+            padding: 14px 36px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 6px 10px;
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #6C3EFF, #8B5CF6);
+            border: none;
+            color: #fff;
+            box-shadow: 0 4px 30px rgba(108, 62, 255, 0.35);
+        }
+        .btn-primary-custom:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 50px rgba(108, 62, 255, 0.5);
+            color: #fff;
+        }
+        .btn-outline-custom {
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            background: transparent;
+        }
+        .btn-outline-custom:hover {
+            border-color: #6C3EFF;
+            background: rgba(108, 62, 255, 0.08);
+            color: #fff;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─── SCROLL REVEAL ─── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ─── SECTIONS ─── */
+        .section-padding {
+            padding: 90px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-title {
+            font-size: 2.6rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .section-title span {
+            background: linear-gradient(135deg, #6C3EFF, #00D4AA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .section-subtitle {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 1.05rem;
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        .bg-dark-section {
+            background: rgba(26, 32, 53, 0.35);
+            backdrop-filter: blur(8px);
+        }
+
+        /* ─── FEATURES ─── */
+        .feature-card {
+            background: rgba(26, 32, 53, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 35px 25px;
+            text-align: center;
+            transition: all 0.4s ease;
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(108, 62, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(108, 62, 255, 0.1);
+        }
+        .feature-icon {
+            font-size: 2.8rem;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .feature-desc {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* ─── STEPS ─── */
+        .step-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6C3EFF, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 auto 16px;
+            box-shadow: 0 0 30px rgba(108, 62, 255, 0.3);
+        }
+
+        /* ─── STATS ─── */
+        .stat-number {
+            font-size: 3.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #6C3EFF, #00D4AA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ─── TESTIMONIALS ─── */
+        .testimonial-card {
+            background: rgba(26, 32, 53, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px 25px;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .testimonial-card:hover {
+            border-color: rgba(108, 62, 255, 0.2);
+        }
+        .testimonial-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6C3EFF, #00D4AA);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        .testimonial-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            font-style: italic;
+        }
+        .testimonial-name {
+            font-weight: 600;
+            color: #fff;
+            margin-top: 12px;
+        }
+        .testimonial-role {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.8rem;
+        }
+
+        /* ─── FAQ ─── */
+        .faq-item {
+            background: rgba(26, 32, 53, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .faq-item:hover {
+            border-color: rgba(108, 62, 255, 0.2);
+        }
+        .faq-question {
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-question i {
+            color: #6C3EFF;
+            transition: transform 0.3s ease;
+        }
+        .faq-answer {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            margin-top: 10px;
+            display: none;
+        }
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            padding: 40px 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            position: relative;
+            z-index: 2;
+        }
+        .footer a {
+            color: rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer a:hover {
+            color: #6C3EFF;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+            .section-title {
+                font-size: 2.2rem;
+            }
+        }
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.4rem;
+            }
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            .hero-buttons .btn {
+                padding: 10px 24px;
+                font-size: 0.85rem;
+            }
+            .section-title {
+                font-size: 1.8rem;
+            }
+            .stat-number {
+                font-size: 2.4rem;
+            }
+            .section-padding {
+                padding: 60px 0;
+            }
+            .feature-card {
+                padding: 25px 18px;
+            }
+        }
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            .hero-badge {
+                font-size: 0.7rem;
+                padding: 5px 14px;
+            }
+            .hero-buttons .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ ANIMATED BACKGROUND ═══ -->
+    <div class="hero-bg">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="particles" id="particles"></div>
     </div>
-</section>
-{% endblock %}
+
+    <!-- ════════════════════════════════════════════════════════════════
+    HERO
+    ════════════════════════════════════════════════════════════════ -->
+    <section class="hero">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="hero-badge">
+                        <i class="fa-solid fa-robot me-2"></i> Plateforme éducative avec IA
+                    </div>
+
+                    <h1 class="hero-title">
+                        Maîtrisez le français<br />
+                        avec l'Intelligence Artificielle
+                    </h1>
+
+                    <p class="hero-subtitle">
+                        Cours interactifs, exercices générés par IA, chatbot disponible 24h/24,
+                        et outils pédagogiques pour enseignants et élèves.
+                    </p>
+
+                    <div class="hero-buttons">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary-custom">
+                            <i class="fa-solid fa-rocket me-2"></i> Commencer
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-custom">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> Connexion
+                        </a>
+                        <a href="{% url 'accounts:register' %}" class="btn btn-outline-custom">
+                            <i class="fa-regular fa-user me-2"></i> Créer un compte
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+    FONCTIONNALITÉS
+    ════════════════════════════════════════════════════════════════ -->
+    <section class="section-padding bg-dark-section" id="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title reveal">Fonctionnalités <span>puissantes</span></h2>
+                <p class="section-subtitle reveal">
+                    Découvrez tous les outils disponibles sur École FLE.
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3 col-6 reveal">
+                    <div class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <h6 class="feature-title">Générateur de leçons</h6>
+                        <p class="feature-desc">Créez des leçons interactives en un clic.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 reveal">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎮</div>
+                        <h6 class="feature-title">Générateur de jeux</h6>
+                        <p class="feature-desc">Des jeux éducatifs pour apprendre en s'amusant.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 reveal">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧠</div>
+                        <h6 class="feature-title">Cartes mentales</h6>
+                        <p class="feature-desc">Organisez vos idées visuellement.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 reveal">
+                    <div class="feature-card">
+                        <div class="feature-icon">✅</div>
+                        <h6 class="feature-title">Correcteur IA</h6>
+                        <p class="feature-desc">Corrigez les fautes automatiquement.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 reveal">
+                    <div class="feature-card">
+                        <div class="feature-icon">💬</div>
+                        <h6 class="feature-title">Forum</h6>
+                        <p class="feature-desc">Échangez avec la communauté.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 reveal">
+                    <div class="feature-card">
+                        <div class="feature-icon">📡</div>
+                        <h6 class="feature-title">Sessions Live</h6>
+                        <p class="feature-desc">Cours en direct avec vos professeurs.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 reveal">
+                    <div class="feature-card">
+                        <div class="feature-icon">📖</div>
+                        <h6 class="feature-title">Bibliothèque</h6>
+                        <p class="feature-desc">Accédez à des ressources variées.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 reveal">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h6 class="feature-title">Assistant IA</h6>
+                        <p class="feature-desc">Un chatbot disponible 24h/24.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+    COMMENT ÇA MARCHE
+    ════════════════════════════════════════════════════════════════ -->
+    <section class="section-padding" id="how-it-works">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title reveal">Comment ça <span>marche</span> ?</h2>
+                <p class="section-subtitle reveal">Trois étapes simples pour commencer.</p>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-4 reveal text-center">
+                    <div class="step-number">1</div>
+                    <h5 class="text-white fw-bold">Créez un compte</h5>
+                    <p class="text-muted">Inscrivez-vous gratuitement en quelques secondes.</p>
+                </div>
+                <div class="col-md-4 reveal text-center">
+                    <div class="step-number">2</div>
+                    <h5 class="text-white fw-bold">Choisissez votre niveau</h5>
+                    <p class="text-muted">Sélectionnez A1, A2 ou B1 selon votre niveau.</p>
+                </div>
+                <div class="col-md-4 reveal text-center">
+                    <div class="step-number">3</div>
+                    <h5 class="text-white fw-bold">Commencez à apprendre</h5>
+                    <p class="text-muted">Accédez aux cours, exercices et outils IA.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+    STATISTIQUES
+    ════════════════════════════════════════════════════════════════ -->
+    <section class="section-padding bg-dark-section" id="stats">
+        <div class="container">
+            <div class="row text-center g-4">
+                <div class="col-6 col-md-3 reveal">
+                    <div class="glass-card p-4">
+                        <div class="stat-number" data-count="150">0</div>
+                        <div class="text-muted mt-1">Élèves inscrits</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 reveal">
+                    <div class="glass-card p-4">
+                        <div class="stat-number" data-count="25">0</div>
+                        <div class="text-muted mt-1">Cours disponibles</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 reveal">
+                    <div class="glass-card p-4">
+                        <div class="stat-number" data-count="12">0</div>
+                        <div class="text-muted mt-1">Enseignants experts</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 reveal">
+                    <div class="glass-card p-4">
+                        <div class="stat-number" data-count="98">0</div>
+                        <div class="text-muted mt-1">Satisfaction (%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+    TÉMOIGNAGES
+    ════════════════════════════════════════════════════════════════ -->
+    <section class="section-padding" id="testimonials">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title reveal">Ils nous <span>font confiance</span></h2>
+                <p class="section-subtitle reveal">Ce que nos utilisateurs disent de nous.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4 reveal">
+                    <div class="testimonial-card">
+                        <div class="testimonial-avatar">S</div>
+                        <p class="testimonial-text">"Grâce à École FLE, j'ai progressé en français en seulement 3 mois. Les exercices IA sont incroyables !"</p>
+                        <div class="testimonial-name">Sarah M.</div>
+                        <div class="testimonial-role">Élève, niveau A2</div>
+                    </div>
+                </div>
+                <div class="col-md-4 reveal">
+                    <div class="testimonial-card">
+                        <div class="testimonial-avatar">A</div>
+                        <p class="testimonial-text">"La plateforme est intuitive et les outils IA m'aident à gagner un temps précieux dans mes cours."</p>
+                        <div class="testimonial-name">Ahmed K.</div>
+                        <div class="testimonial-role">Enseignant de français</div>
+                    </div>
+                </div>
+                <div class="col-md-4 reveal">
+                    <div class="testimonial-card">
+                        <div class="testimonial-avatar">L</div>
+                        <p class="testimonial-text">"Le chatbot est disponible à tout moment, c'est comme avoir un professeur personnel 24h/24."</p>
+                        <div class="testimonial-name">Lina R.</div>
+                        <div class="testimonial-role">Élève, niveau B1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+    FAQ
+    ════════════════════════════════════════════════════════════════ -->
+    <section class="section-padding bg-dark-section" id="faq">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title reveal">Foire aux <span>questions</span></h2>
+                <p class="section-subtitle reveal">Les réponses à vos questions les plus fréquentes.</p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="faq-item reveal" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>❓ La plateforme est-elle gratuite ?</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Oui, École FLE est entièrement gratuite pour les élèves et les enseignants. Aucune carte bancaire n'est requise.
+                        </div>
+                    </div>
+                    <div class="faq-item reveal" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>❓ Quels niveaux sont disponibles ?</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Nous proposons trois niveaux : A1 (débutant), A2 (élémentaire) et B1 (intermédiaire). D'autres niveaux arriveront bientôt.
+                        </div>
+                    </div>
+                    <div class="faq-item reveal" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>❓ Puis-je utiliser l'IA en tant qu'enseignant ?</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Absolument ! Les enseignants ont accès à tous les outils IA : générateur d'exercices, correcteur, générateur de leçons, etc.
+                        </div>
+                    </div>
+                    <div class="faq-item reveal" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>❓ L'application est-elle disponible sur mobile ?</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Oui, la plateforme est entièrement responsive et fonctionne parfaitement sur smartphone et tablette.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+    SUPPORT & CONTACT
+    ════════════════════════════════════════════════════════════════ -->
+    <section class="section-padding" id="contact">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title reveal">Besoin d'<span>aide</span> ?</h2>
+                <p class="section-subtitle reveal">Nous sommes là pour vous accompagner.</p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-6 reveal">
+                    <div class="glass-card p-5 text-center">
+                        <i class="fa-regular fa-envelope" style="font-size: 2.5rem; color: #6C3EFF; margin-bottom: 15px;"></i>
+                        <h5 class="text-white">Contactez-nous</h5>
+                        <p class="text-muted">Nous répondons dans les 24 heures.</p>
+                        <a href="mailto:support@ecolefle.com" class="btn btn-primary-custom">
+                            <i class="fa-regular fa-paper-plane me-2"></i> Écrire au support
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+    FOOTER
+    ════════════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="container">
+            <p>
+                © 2026 <strong style="color: rgba(255,255,255,0.4);">École FLE</strong> —
+                Plateforme éducative avec Intelligence Artificielle
+            </p>
+            <p style="margin-top: 6px; font-size: 0.75rem;">
+                <a href="#">Mentions légales</a> &middot;
+                <a href="#">Politique de confidentialité</a> &middot;
+                <a href="#">Contact</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- ═══ SCRIPTS ═══ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script>
+        // ─── PARTICLES ──────────────────────────────────────────────
+        const container = document.getElementById('particles');
+        for (let i = 0; i < 45; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDelay = Math.random() * 18 + 's';
+            p.style.animationDuration = 12 + Math.random() * 14 + 's';
+            p.style.width = 2 + Math.random() * 4 + 'px';
+            p.style.height = p.style.width;
+            container.appendChild(p);
+        }
+
+        // ─── SCROLL REVEAL ──────────────────────────────────────────
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        reveals.forEach(el => observer.observe(el));
+
+        // ─── COUNTER ANIMATION ─────────────────────────────────────
+        const counters = document.querySelectorAll('.stat-number');
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-count'));
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+
+            const update = () => {
+                current += step;
+                if (current < target) {
+                    counter.textContent = Math.round(current) + (target > 100 ? '+' : '');
+                    requestAnimationFrame(update);
+                } else {
+                    counter.textContent = target + (target > 100 ? '+' : '');
+                }
+            };
+
+            const obs = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        update();
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            obs.observe(counter);
+        });
+
+        // ─── FAQ TOGGLE ─────────────────────────────────────────────
+        function toggleFaq(el) {
+            el.classList.toggle('active');
+        }
+    </script>
+
+</body>
+</html>
+```
